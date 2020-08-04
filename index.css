@@ -17,6 +17,16 @@ body {
   -ms-flex-direction: column;
   flex-direction: column;
 }
+.containter p {
+  text-align: center;
+  display: inline-block;
+  line-height: 2em;
+  font-size: 4em;
+  font-weight: 500;
+  margin: 0 auto;
+  color: #00d5ff;
+  text-shadow: 0.1em 0.1em 0.1em rgba(175, 175, 175, 0.5);
+}
 .containter > div {
   --col: hsl(203, 100%, 50%);
   --col-a: hsla(195, 100%, 50%, .8);
@@ -27,7 +37,7 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   -ms-flex-direction: column;
   flex-direction: column;
 }
