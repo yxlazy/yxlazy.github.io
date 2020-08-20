@@ -16,6 +16,9 @@ body {
   align-items: flex-start;
   -ms-flex-direction: column;
   flex-direction: column;
+  max-width: 750px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .containter p {
   text-align: center;
@@ -26,6 +29,10 @@ body {
   margin: 0 auto;
   color: #00d5ff;
   text-shadow: 0.1em 0.1em 0.1em rgba(175, 175, 175, 0.5);
+}
+.containter p::selection {
+  background: orange;
+  color: #fff;
 }
 .containter > div {
   --col: hsl(203, 100%, 50%);
