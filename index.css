@@ -27,7 +27,7 @@ body {
   font-size: 4em;
   font-weight: 500;
   margin: 0 auto;
-  color: #00d5ff;
+  color: #1a2a3a;
   text-shadow: 0.1em 0.1em 0.1em rgba(175, 175, 175, 0.5);
 }
 .containter p::selection {
@@ -35,11 +35,11 @@ body {
   color: #fff;
 }
 .containter > div {
-  --col: hsl(203, 100%, 50%);
-  --col-a: hsla(195, 100%, 50%, .8);
+  --col: #2a3a4a;
+  --col-a: #3a4a5a;
   padding: 4em;
   margin: 4em 0;
-  border: 0.1em solid rgba(0, 157, 255, 0.8);
+  border: 0.1em solid rgba(58, 74, 90, 0.25);
   border-radius: 2em;
   width: 100%;
   display: flex;
@@ -61,7 +61,7 @@ body {
   transition: color 0.5s;
 }
 .containter > div a:hover {
-  color: var(--col);
+  color: rgba(0, 170, 255, 0.8);
 }
 .containter > div a span {
   font-size: 1.8em;
