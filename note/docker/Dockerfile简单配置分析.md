@@ -75,3 +75,8 @@ CMD ["npm", "start"]	#CMD的主要目的是为执行容器提供默认值
 [2] [如何高效查看 Docker 日志](https://www.cnblogs.com/yangxiayi1987/p/11818184.html)
 
 [3] [docker-compose.yml 配置文件编写详解](https://blog.csdn.net/qq_36148847/article/details/79427878)
+
+[4] [Dockerfile详解超全](https://blog.csdn.net/atlansi/article/details/87892016)
+
+
+
