@@ -13,7 +13,7 @@ this.request = Object.create(request);//实例化this.request对象
 this.response = Object.create(response);//实例化this.response对象
 ```
 
-`this.context = Object.create(context);` 通过`Object.create` 实例化一个对象`this.context` 这个对象将会继承`context` 对象的所有属性和方法；
+`this.context = Object.create(context);` 通过`Object.create` 实例化一个对象`this.context` ，这个对象将会继承`context` 对象的所有属性和方法。通过`Object.create` 方法新创建的`this.context` 是一个空对象`{}`；
 
  ```js
   createContext(req, res) {
@@ -32,7 +32,7 @@ this.response = Object.create(response);//实例化this.response对象
   }
  ```
 
-`createContext`方法中第一条语句 `const context = Object.create(this.context);`  也就是说当我们通过`app.context.xxx` 添加某个属性时，由于通过`Object.create(this.context)` 继承了添加在`app.context` 对象上的属性，因此可以通过`ctx.xxx` 直接调用。
+继续往下查看，可以看到一个 `createContext` 方法，该方法中第一条语句 `const context = Object.create(this.context);`  也就是说当我们通过`app.context.xxx` 添加某个属性时，由于通过`Object.create(this.context)` 继承了添加在`app.context` 对象上的属性，因此可以通过`ctx.xxx` 直接调用。
 
 ## 补充
 
