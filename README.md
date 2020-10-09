@@ -68,6 +68,7 @@
             <a href="https://picsum.photos/"><span>一个可以获得随机图片的网站</span></a><br/>
             <a href="https://www.liaoxuefeng.com/"><span>廖雪峰官网</span></a><br/>
             <a href="https://cn.vuejs.org/v2/guide/syntax.html"><span>Vuejs中文文档</span></a><br/>
+            <a href="https://www.sequelize.com.cn/"><span>sequelize中文文档</span></a><br/>
         </div>
         <div>
             <p>Good Tools</p>
@@ -75,5 +76,6 @@
     </div>
 </body>
 </html>
+
 
 
