@@ -29,7 +29,7 @@ Object.isExtensible(myTesla); //true
 Object.preventExtensions(myTesla);
 Object.isExtensible(myTesla); //false
 myTesla.color = 'blue';
-consoe.log(myTesla.color); //undefined
+console.log(myTesla.color); //undefined
 ```
 
 ## Object.seal()
@@ -54,7 +54,7 @@ Object.defineProperty(myTesla, 'batteryLife'); // TypeError: Cannot redefine pro
 
 ## Object.freeze()
 
-此方法与`Object.seal()` 相似，是它的升级版。此方法使属性不可写。
+此方法与`Object.seal()` 使属性不可写相同。
 
 ```js
 Object.isFrozen(myTesla); // false
