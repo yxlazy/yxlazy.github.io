@@ -72,6 +72,7 @@
         </div>
         <div>
             <p>Good Tools</p>
+            <a href="https://the-x.cn/"><span>各种加密解密工具</span></a><br/>
         </div>
     </div>
 </body>
