@@ -1,0 +1,19 @@
+{
+  "name": "yanxiaolazy.github.io",
+  "version": "1.0.0",
+  "description": "yanxiaolazy.github.io",
+  "private": "true",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yanxiaolazy/yanxiaolazy.github.io.git"
+  },
+  "keywords": ["blog"],
+  "author": "yanxiaolazy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yanxiaolazy/yanxiaolazy.github.io/issues"
+  },
+  "homepage": "https://github.com/yanxiaolazy/yanxiaolazy.github.io#readme"
+}
