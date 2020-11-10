@@ -1,7 +1,7 @@
 const {resolve} = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-// const remarkGfm = require('remark-gfm');
+const remarkGfm = require('remark-gfm');
 
 
 const mode = process.env.NODE_DEV === 'development' ? 'development' : 'production';
@@ -59,7 +59,7 @@ module.exports = {
           {
             loader: '@mdx-js/loader',
             options: {
-              // remarkPlugins: [remarkGfm]
+              remarkPlugins: [remarkGfm]
             }
           }
         ]

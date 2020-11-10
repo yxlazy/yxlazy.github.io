@@ -34,6 +34,7 @@
     "css-loader": "^5.0.1",
     "html-webpack-plugin": "^4.5.0",
     "path-browserify": "^1.0.1",
+    "remark-gfm": "^1.0.0",
     "sass-loader": "^10.0.5",
     "style-loader": "^2.0.0",
     "webpack": "^5.4.0",
