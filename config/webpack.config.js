@@ -20,7 +20,9 @@ module.exports = {
     port: 80,
     hot: true,
     contentBase: resolve(__dirname, '../build'),
-    open: true
+    open: true,
+    inline: true,
+    historyApiFallback: true
   },
   module: {
     rules: [
@@ -29,7 +31,7 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/,
         options: {
-            presets: ['@babel/preset-react']
+            presets: ['@babel/preset-env', '@babel/preset-react']
         }
       },
       {
@@ -53,7 +55,7 @@ module.exports = {
           {
             loader: 'babel-loader',
             options: {
-              presets: ['@babel/preset-react']
+              presets: ['@babel/preset-env', '@babel/preset-react']
             }
           },
           {
