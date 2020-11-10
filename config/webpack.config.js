@@ -13,7 +13,7 @@ module.exports = {
   },
   output: {
     filename: '[name].bundle.js',
-    path: resolve(__dirname, '../build')
+    path: resolve(__dirname, '../docs')
   },
   devtool: 'inline-source-map',
   devServer: {

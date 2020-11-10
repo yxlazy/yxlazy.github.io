@@ -73,10 +73,10 @@ body {
     }
     a:hover {
         text-decoration: none;
-        color: #ff6600;
+        color: hsla(24, 100%, 50%, .8);
     }
     a:visited {
-        /*color: purple;*/
+        color: hsla(24, 100%, 50%, .8);
     }
     ul, ol {
         padding: 0;
