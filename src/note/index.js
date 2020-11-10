@@ -1,4 +1,4 @@
-import './index.css';
+import './index.scss';
 //css
 import GridLayout from './css/网格布局（grid）.md';
 //dos

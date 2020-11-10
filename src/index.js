@@ -1,52 +1,15 @@
-import React from 'react';
+import React, {StrictMode, Fragment} from 'react';
 import {render} from 'react-dom';
-import {  
-  GridLayout,
-  DosCommand,
-  BuildAndPush,
-  DockerfileConfigAnalyse,
-  CanalBinlogOutOfSync,
-  DeferAsyncAndDOMContentloaded,
-  ForInAndForOf,
-  KoaAppContext,
-  SequelizeCliUse,
-  YouDonotKnownViod0,
-  NginxConfigAnalyse,
-  ReactWorkingPrinciple,
-  CreatingImmutableObjects,
-  UbuntuExpansion} from './note';
+import App from './views/App';
+import 'antd/dist/antd.css';
 
 render(
-  <div>
-    <GridLayout/>
-    <hr />
-    <DosCommand/>
-    <hr />
-    <BuildAndPush/>
-    <hr />
-    <DockerfileConfigAnalyse/>
-    <hr />
-    <CanalBinlogOutOfSync/>
-    <hr />
-    <DeferAsyncAndDOMContentloaded/>
-    <hr />
-    <ForInAndForOf/>
-    <hr />
-    <KoaAppContext/>
-    <hr />
-    <SequelizeCliUse/>
-    <hr />
-    <YouDonotKnownViod0/>
-    <hr />
-    <NginxConfigAnalyse/>
-    <hr />
-    <ReactWorkingPrinciple/>
-    <hr />
-    <CreatingImmutableObjects/>
-    <hr />
-    <UbuntuExpansion/>
-    <hr />
-  </div>,
+  <StrictMode>
+    <Fragment>
+      <App />
+    </Fragment>
+  </StrictMode>,
   document.getElementById('root')
 );
+
 
