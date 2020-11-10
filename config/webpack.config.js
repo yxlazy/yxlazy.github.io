@@ -7,7 +7,7 @@ const remarkGfm = require('remark-gfm');
 const mode = process.env.NODE_DEV === 'development' ? 'development' : 'production';
 
 module.exports = {
-  mode: 'development',
+  mode,
   entry: {
     index: resolve(__dirname, '../src/index.js')
   },

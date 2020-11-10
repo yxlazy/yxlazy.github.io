@@ -4,7 +4,7 @@
   "description": "yanxiaolazy.github.io",
   "private": "true",
   "scripts": {
-    "build": "webpack --config ./config/webpack.config.js",
+    "build": "set NODE_DEV=production && webpack --config ./config/webpack.config.js",
     "start": "set NODE_DEV=development && npx webpack-cli serve --config ./config/webpack.config.js"
   },
   "repository": {
