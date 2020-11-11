@@ -1,21 +1,24 @@
 import React from 'react';
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import {Router, Route, Switch} from 'react-router-dom';
 import {Card} from 'antd';
+import {createHashHistory} from 'history';
 
 import Home from '../Home';
 import BlogLayout from '../BlogLayout';
 
 export default App;
 
+const history = createHashHistory();
+
 function App() {
   return(
-    <BrowserRouter>
+    <Router history={history}>
       <Switch>
         <Route exact path='/' component={Home}/>
         <Route exact path='/blogs' component={BlogLayout}/>
         <Route component={NotFound}/>
       </Switch>
-    </BrowserRouter>
+    </Router>
   );
 }
 
