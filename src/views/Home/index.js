@@ -24,10 +24,11 @@ import './index.scss';
 function HomeLayout({children}) {
   const [navbarClassName, setNavBarClassName] = useState('');
   const scrollRef = useRef(null);
+  const navbarRef = useRef(null);
 
   useEffect(() => {
     window.addEventListener('scroll', function () {
-      if (document.documentElement.scrollTop >= scrollRef.current.offsetHeight) {
+      if ((document.documentElement.scrollTop + navbarRef.current.offsetHeight) >= scrollRef.current.offsetHeight) {
         setNavBarClassName('navbar-fixed');
       } else {
         setNavBarClassName('');
@@ -39,7 +40,7 @@ function HomeLayout({children}) {
     <div className='home'>
       <div className='home-background' ref={scrollRef}>
         <Affix offsetTop={0}>
-          <div className={`home-navbar ${navbarClassName}`}>
+          <div className={`home-navbar ${navbarClassName}`} ref={navbarRef}>
             <div className='navbar-logo'>yanxiaolazy</div>
             <div className='navbar-link-list'>
               <div>about</div>
