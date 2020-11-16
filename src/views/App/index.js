@@ -3,8 +3,10 @@ import {Router, Route, Switch} from 'react-router-dom';
 import {Card} from 'antd';
 import {createHashHistory} from 'history';
 
-import Home from '../Home';
+import Index from '../Index';
 import BlogLayout from '../BlogLayout';
+import Home from '../Home';
+import './index.css';
 
 export default App;
 
@@ -15,6 +17,7 @@ function App() {
     <Router history={history}>
       <Switch>
         <Route exact path='/' component={Home}/>
+        <Route exact path='/index' component={Index} />
         <Route exact path='/blogs' component={BlogLayout}/>
         <Route component={NotFound}/>
       </Switch>

@@ -13,6 +13,8 @@ import ForInAndForOf from './js/for-in和for-of.md';
 import KoaAppContext from './js/koa2 app.context.md';
 import SequelizeCliUse from './js/sequelize cli.md';
 import YouDonotKnownViod0 from './js/你不知道的viod 0.md';
+import CalleeAndCaller from './js/arguments.callee 和fn.caller.md';
+import ThisObject from './js/this对象.md';
 //nginx
 import NginxConfigAnalyse from './nginx/nginx配置文件介绍.md';
 //react
@@ -36,5 +38,7 @@ export {
   NginxConfigAnalyse,
   ReactWorkingPrinciple,
   CreatingImmutableObjects,
-  UbuntuExpansion
+  UbuntuExpansion,
+  CalleeAndCaller,
+  ThisObject
 }
