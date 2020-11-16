@@ -5,7 +5,6 @@ const remarkGfm = require('remark-gfm');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const plugins = [
-  new CleanWebpackPlugin({cleanStaleWebpackAssets: false}),
   new HtmlWebpackPlugin({template: resolve(__dirname, '../public/index.html')}),
 ]
 
@@ -16,8 +15,9 @@ module.exports = env => {
   //MiniCssExtractPlugin会使HMR功能缺失
   if (!devMode) {
     plugins.push(new MiniCssExtractPlugin({filename: '[name].[contenthash].css'}));
+    plugins.unshift(new CleanWebpackPlugin({cleanStaleWebpackAssets: false}));
   }
-
+  console.log(plugins)
   return {
     mode,
     entry: {
