@@ -1,5 +1,4 @@
 .home {
-  height: 2000px;
   .home-background {
     // background-image: linear-gradient(to right, #aaa, #ddd, #999);
     background-image: url('https://picsum.photos/1900/1500');
@@ -42,11 +41,45 @@
     flex-flow: column nowrap;
 
     .ant-card {
-      margin: 20px;
+      margin: 40px;
       width: 60rem;
       height: 20rem;
       display: grid;
       grid-template-columns: 25% 75%;
+      position: relative;
+
+      &::before,
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        width: 0;
+        height: 0;
+      }
+      
+      &:hover {
+        &::before {
+          border: 2px solid #ddd;
+          animation: beforeLines .5s ease-in forwards;
+          -webkit-animation: beforeLines .5s ease-in forwards;
+        }
+        &::after {
+          border: 2px solid #ddd;
+          animation: afterLines .5s ease-in forwards;
+          -webkit-animation: afterLines .5s ease-in forwards;
+        }
+        &:first-child {
+          &::before {
+            animation: none;
+          }
+        }
+        &:last-child {
+          &::after {
+            animation: none;
+          }
+        }
+      }
+
       
       .ant-card-cover {
         padding-left: 10px;
@@ -66,4 +99,28 @@
     }
   }
 
+}
+
+@keyframes beforeLines {
+  from {
+    top: 0px;
+    height: 0px;
+  }
+
+  to {
+    top: -81px;
+    height: 80px;
+  }
+}
+
+@keyframes afterLines {
+  from {
+    bottom: 0px;
+    height: 0px;
+  }
+
+  to {
+    bottom: -81px;
+    height: 80px;
+  }
 }
