@@ -17,7 +17,7 @@ module.exports = env => {
     plugins.push(new MiniCssExtractPlugin({filename: '[name].[contenthash].css'}));
     plugins.unshift(new CleanWebpackPlugin({cleanStaleWebpackAssets: false}));
   }
-  console.log(plugins)
+  
   return {
     mode,
     entry: {

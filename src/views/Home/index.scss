@@ -6,51 +6,6 @@
     background-size: cover;
     min-height: 100vh;
 
-    .home-navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      min-height: 30px;
-      padding: 10px;
-
-      .navbar-logo {
-        text-transform: uppercase;
-        font-size: 25px;
-        font-weight: bolder;
-        cursor: pointer;
-        color: hsla(179, 100%, 40%, .9);
-      }
-      .navbar-link-list {
-        display: flex;
-        justify-content: flex-end;
-
-        div {
-          margin: 10px;
-          text-transform: uppercase;
-          cursor: pointer;
-          color: #fff;
-          font-size: 19px;
-          font-weight: 400;
-          letter-spacing: 2px;
-          transition: color .3s ease-in;
-          &:hover {
-            color: #95afc0;
-          }
-        }
-
-      }
-    }
-    .navbar-fixed {
-      background-color: #fff;
-      box-shadow: 0 15px 10px -10px #bbb;
-      .navbar-logo {
-        color: hsla(179, 100%, 40%, .5);
-      }
-      .navbar-link-list div {
-        color: #636e72;
-      }
-    }
-
     .home-info-container {
       display: flex;
       justify-content: center;

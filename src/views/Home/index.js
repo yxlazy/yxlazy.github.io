@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {Affix, Card, Skeleton} from 'antd';
+import {Card, Skeleton} from 'antd';
+import Navbar from '../../components/Navbar';
 import {
   GridLayout,
   DosCommand,
@@ -39,16 +40,7 @@ function HomeLayout({children}) {
   return(
     <div className='home'>
       <div className='home-background' ref={scrollRef}>
-        <Affix offsetTop={0}>
-          <div className={`home-navbar ${navbarClassName}`} ref={navbarRef}>
-            <div className='navbar-logo'>yanxiaolazy</div>
-            <div className='navbar-link-list'>
-              <div>about</div>
-              <div>blog</div>
-              <div>index</div>
-            </div>
-          </div>
-        </Affix>
+        <Navbar navbarClassName={navbarClassName}  ref={navbarRef}/>
         <div className='home-info-container'>
           <div className='home-info'>
             <div>Life is full of joy</div>
