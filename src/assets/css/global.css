@@ -67,3 +67,53 @@ html {
   font-size: 10px;
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
+#root {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+}
+@media screen and (max-width: 576px) {
+  html {
+    font-size: 5px;
+  }
+}
+@media screen and (min-width: 576px) {
+  html {
+    font-size: 8px;
+  }
+  /*#root {
+    max-width: 540px;
+  }; */
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 8px;
+  } 
+  /*#root {
+    max-width: 720px;
+  }; */
+}
+@media (min-width: 992px) {
+  html {
+    font-size: 9px;
+  }
+  /* #root {
+    max-width: 960px;
+  }; */
+}
+@media (min-width: 1200px) {
+  html {
+    font-size: 10px;
+  }
+  /* #root {
+    max-width: 1140px;
+  }; */
+}
+@media (min-width: 1400px) {
+  /* html {
+    font-size: 10px;
+  }
+  #root {
+    max-width: 1320px;
+  }; */
+}

@@ -42,10 +42,10 @@
 
     .ant-card {
       margin: 8rem;
-      width: 90rem;
-      height: 30rem;
+      // width: 50%;
+      // height: 35rem;
       display: grid;
-      grid-template-columns: 25% 75%;
+      // grid-template-columns: 30% 70%;
       position: relative;
 
       &::before,
@@ -88,7 +88,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 30rem;
+        // height: 10rem;
       }
       .ant-card-body {
         overflow: hidden;
@@ -125,4 +125,63 @@
     bottom: -16rem;
     height: 16rem;
   }
+}
+@media screen and (max-width: 576px) {
+  .home
+  .home-content
+  .ant-card {
+    margin: 5px;
+    width: 100%;
+    height: 27rem;
+    grid-template-columns: 20rem 78%;
+  }
+}
+
+@media screen and (min-width: 576px) {
+  .home
+  .home-content
+  .ant-card {
+    margin: 10px;
+    width: 100%;
+    height: 27rem;
+    grid-template-columns: 21rem 78%;
+  }
+}
+@media (min-width: 768px) {
+  .home
+  .home-content
+  .ant-card {
+    margin: 5rem;
+    width: 90%;
+    height: 35rem;
+    grid-template-columns: 27rem 74%;
+  }
+}
+@media (min-width: 992px) {
+  .home
+  .home-content
+  .ant-card {
+    margin: 8rem;
+    width: 900px;
+    height: 35rem;
+    grid-template-columns: 28rem 70%;
+  }
+}
+@media (min-width: 1200px) {
+  .home
+  .home-content
+  .ant-card {
+    margin: 8rem;
+    width: 900px;
+    height: 35rem;
+    grid-template-columns: 28rem 70%;
+  }
+}
+@media (min-width: 1400px) {
+  /* html {
+    font-size: 10px;
+  }
+  #root {
+    max-width: 1320px;
+  }; */
 }
