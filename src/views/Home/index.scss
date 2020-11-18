@@ -34,16 +34,16 @@
   }
 
   .home-content {
-    padding: 40px;
+    padding: 4rem;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-flow: column nowrap;
 
     .ant-card {
-      margin: 40px;
-      width: 60rem;
-      height: 20rem;
+      margin: 8rem;
+      width: 90rem;
+      height: 30rem;
       display: grid;
       grid-template-columns: 25% 75%;
       position: relative;
@@ -65,16 +65,18 @@
         }
         &::after {
           border: 2px solid #ddd;
-          animation: afterLines .5s ease-in forwards;
-          -webkit-animation: afterLines .5s ease-in forwards;
+          animation: afterLines .8s ease-in forwards;
+          -webkit-animation: afterLines .8s ease-in forwards;
         }
         &:first-child {
           &::before {
+            border: none;
             animation: none;
           }
         }
         &:last-child {
           &::after {
+            border: none;
             animation: none;
           }
         }
@@ -82,16 +84,16 @@
 
       
       .ant-card-cover {
-        padding-left: 10px;
+        padding-left: 1.3rem;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 20rem;
+        height: 30rem;
       }
       .ant-card-body {
         overflow: hidden;
         text-overflow: ellipsis;
-        margin: 10px;
+        margin: 1.65rem;
       }
       .ant-card-loading-content {
         width: inherit;
@@ -108,8 +110,8 @@
   }
 
   to {
-    top: -81px;
-    height: 80px;
+    top: -16rem;
+    height: 16rem;
   }
 }
 
@@ -120,7 +122,7 @@
   }
 
   to {
-    bottom: -81px;
-    height: 80px;
+    bottom: -16rem;
+    height: 16rem;
   }
 }
