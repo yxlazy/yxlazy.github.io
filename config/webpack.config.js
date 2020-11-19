@@ -3,10 +3,20 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const remarkGfm = require('remark-gfm');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const plugins = [
   new HtmlWebpackPlugin({template: resolve(__dirname, '../public/index.html')}),
 ]
+
+const optimization = {
+  splitChunks: {
+    chunks: 'all',
+    maxSize: 244000
+  },
+  minimize: true,
+  minimizer: [new TerserPlugin()]
+}
 
 module.exports = env => {
   const mode = env.NODE_ENV !== 'production' ? 'development' : 'production';
@@ -27,12 +37,7 @@ module.exports = env => {
       filename: '[name].[hash].js',
       path: resolve(__dirname, '../docs')
     },
-    optimization: {
-      splitChunks: {
-        chunks: 'all',
-        maxSize: 244000
-      }
-    },
+    optimization: devMode ? {} :  Object.assign({}, optimization),
     devtool: devMode ? 'inline-source-map' : false,
     devServer: {
       port: 80,

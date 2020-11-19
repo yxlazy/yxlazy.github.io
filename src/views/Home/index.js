@@ -30,7 +30,7 @@ function HomeLayout({children}) {
   const navbarRef = useRef(null);
 
   useEffect(() => {
-
+    // setNavBarClassName('navbar-fixed')
     function scrollEven() {
       if (navbarRef.current?.offsetHeight && scrollRef.current?.offsetHeight && (document.documentElement.scrollTop + navbarRef.current.offsetHeight) >= scrollRef.current.offsetHeight) {
         setNavBarClassName('navbar-fixed');
@@ -38,6 +38,7 @@ function HomeLayout({children}) {
         setNavBarClassName('');
       }
     }
+    scrollEven();
     window.addEventListener('scroll', scrollEven);
 
     return function () {

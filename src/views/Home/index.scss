@@ -57,30 +57,30 @@
         height: 0;
       }
       
-      &:hover {
-        &::before {
-          border: 2px solid #ddd;
-          animation: beforeLines .5s ease-in forwards;
-          -webkit-animation: beforeLines .5s ease-in forwards;
-        }
-        &::after {
-          border: 2px solid #ddd;
-          animation: afterLines .8s ease-in forwards;
-          -webkit-animation: afterLines .8s ease-in forwards;
-        }
-        &:first-child {
-          &::before {
-            border: none;
-            animation: none;
-          }
-        }
-        &:last-child {
-          &::after {
-            border: none;
-            animation: none;
-          }
-        }
-      }
+      // &:hover {
+      //   &::before {
+      //     border: 2px solid #ddd;
+      //     animation: beforeLines .5s ease-in forwards;
+      //     -webkit-animation: beforeLines .5s ease-in forwards;
+      //   }
+      //   &::after {
+      //     border: 2px solid #ddd;
+      //     animation: afterLines .8s ease-in forwards;
+      //     -webkit-animation: afterLines .8s ease-in forwards;
+      //   }
+      //   &:first-child {
+      //     &::before {
+      //       border: none;
+      //       animation: none;
+      //     }
+      //   }
+      //   &:last-child {
+      //     &::after {
+      //       border: none;
+      //       animation: none;
+      //     }
+      //   }
+      // }
 
       
       .ant-card-cover {
