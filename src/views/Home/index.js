@@ -23,20 +23,27 @@ import Navbar from '../../components/Navbar';
 import './index.scss';
 import * as note from '../../note';
 
-//传递子组件是防止`scroll`事件频繁触发更新
+//传递子组件是防止`scroll`事件频繁触发不必要的更新
 function HomeLayout({children}) {
   const [navbarClassName, setNavBarClassName] = useState('');
   const scrollRef = useRef(null);
   const navbarRef = useRef(null);
 
   useEffect(() => {
-    window.addEventListener('scroll', function () {
-      if ((document.documentElement.scrollTop + navbarRef.current.offsetHeight) >= scrollRef.current.offsetHeight) {
+
+    function scrollEven() {
+      if (navbarRef.current?.offsetHeight && scrollRef.current?.offsetHeight && (document.documentElement.scrollTop + navbarRef.current.offsetHeight) >= scrollRef.current.offsetHeight) {
         setNavBarClassName('navbar-fixed');
       } else {
         setNavBarClassName('');
       }
-    });
+    }
+    window.addEventListener('scroll', scrollEven);
+
+    return function () {
+      console.log('unmount `HomeLayout` component')
+      window.removeEventListener('scroll', scrollEven);
+    }
   }, []);
 
   return(
@@ -79,13 +86,16 @@ function ShowCard({component, path}) {
   const history = useHistory();
   
   useEffect(() => {
-    imageRef.current.addEventListener('load',function () {
+    function loadImage() {
       setIsLoading(false);
-    });
+    } 
 
-    return imageRef.current.removeEventListener('load', function () {
-      setIsLoading(false);
-    });
+    imageRef.current?.addEventListener('load', loadImage);
+
+    return function () {
+      console.log('unmount `ShowCard` component')
+      imageRef.current?.removeEventListener('load', loadImage);
+    }
   }, []);
 
   function handleSingleCardClick(e) {
@@ -109,12 +119,3 @@ function ShowCard({component, path}) {
   );
 }
 
-function CardLink({path, children}) {
-  return(
-    <div>
-      <Link to={path} className='card-link'>
-        {children}
-      </Link>
-    </div>
-  );
-}
