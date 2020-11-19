@@ -103,29 +103,29 @@
 
 }
 
-@keyframes beforeLines {
-  from {
-    top: 0px;
-    height: 0px;
-  }
+// @keyframes beforeLines {
+//   from {
+//     top: 0px;
+//     height: 0px;
+//   }
 
-  to {
-    top: -16rem;
-    height: 16rem;
-  }
-}
+//   to {
+//     top: -16rem;
+//     height: 16rem;
+//   }
+// }
 
-@keyframes afterLines {
-  from {
-    bottom: 0px;
-    height: 0px;
-  }
+// @keyframes afterLines {
+//   from {
+//     bottom: 0px;
+//     height: 0px;
+//   }
 
-  to {
-    bottom: -16rem;
-    height: 16rem;
-  }
-}
+//   to {
+//     bottom: -16rem;
+//     height: 16rem;
+//   }
+// }
 @media screen and (max-width: 576px) {
   .home
   .home-content

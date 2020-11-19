@@ -1,25 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {Card, Skeleton} from 'antd';
+import {Link, useHistory} from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-import {
-  GridLayout,
-  DosCommand,
-  BuildAndPush,
-  DockerfileConfigAnalyse,
-  CanalBinlogOutOfSync,
-  DeferAsyncAndDOMContentloaded,
-  ForInAndForOf,
-  KoaAppContext,
-  SequelizeCliUse,
-  YouDonotKnownViod0,
-  NginxConfigAnalyse,
-  ReactWorkingPrinciple,
-  CreatingImmutableObjects,
-  UbuntuExpansion,
-  CalleeAndCaller,
-  ThisObject
-} from '../../note';
+// import {
+//   GridLayout,
+//   DosCommand,
+//   BuildAndPush,
+//   DockerfileConfigAnalyse,
+//   CanalBinlogOutOfSync,
+//   DeferAsyncAndDOMContentloaded,
+//   ForInAndForOf,
+//   KoaAppContext,
+//   SequelizeCliUse,
+//   YouDonotKnownViod0,
+//   NginxConfigAnalyse,
+//   ReactWorkingPrinciple,
+//   CreatingImmutableObjects,
+//   UbuntuExpansion,
+//   CalleeAndCaller,
+//   ThisObject
+// } from '../../note';
 import './index.scss';
+import * as note from '../../note';
 
 //传递子组件是防止`scroll`事件频繁触发更新
 function HomeLayout({children}) {
@@ -58,31 +60,23 @@ function HomeLayout({children}) {
 }
 
 export default  function Home() {
+  const noteKeys = Object.keys(note);
   return(
     <HomeLayout>
-      <ShowCard component={<ThisObject/>}/>
-      <ShowCard component={<BuildAndPush/>}/>
-      <ShowCard component={<DockerfileConfigAnalyse/>}/>
-      <ShowCard component={<CanalBinlogOutOfSync/>}/>
-      <ShowCard component={<DeferAsyncAndDOMContentloaded/>}/>
-      <ShowCard component={<ForInAndForOf/>}/>
-      <ShowCard component={<KoaAppContext/>}/>
-      <ShowCard component={<SequelizeCliUse/>}/>
-      <ShowCard component={<YouDonotKnownViod0/>}/>
-      <ShowCard component={<NginxConfigAnalyse/>}/>
-      <ShowCard component={<ReactWorkingPrinciple/>}/>
-      <ShowCard component={<CreatingImmutableObjects/>}/>
-      <ShowCard component={<UbuntuExpansion/>}/>
-      <ShowCard component={<CalleeAndCaller/>}/>
-      <ShowCard component={<GridLayout/>}/>
-      <ShowCard component={<DosCommand/>}/>
+      {
+        noteKeys.map(k => {
+          const Details = note[k];
+        return (<ShowCard key={k.toString()} component={<Details/>} path={`/blog/${encodeURIComponent(k.toString())}`}/>)
+        })
+      }
     </HomeLayout>
-  )
+  );
 }
 
-function ShowCard({component}) {
+function ShowCard({component, path}) {
   const [isLoading, setIsLoading] = useState(true);
   const imageRef = useRef(null);
+  const history = useHistory();
   
   useEffect(() => {
     imageRef.current.addEventListener('load',function () {
@@ -93,6 +87,10 @@ function ShowCard({component}) {
       setIsLoading(false);
     });
   }, []);
+
+  function handleSingleCardClick(e) {
+    history.push(path);
+  }
   return(
     <Card 
       hoverable
@@ -102,10 +100,21 @@ function ShowCard({component}) {
           ref={imageRef}
         />
       }
+      onClick={handleSingleCardClick}
     >
       <Skeleton loading={isLoading} active paragraph={{rows: 7}} round title>
-        <Card.Meta description={component}/>  
+        <Card.Meta description={component} />
       </Skeleton>
     </Card>
+  );
+}
+
+function CardLink({path, children}) {
+  return(
+    <div>
+      <Link to={path} className='card-link'>
+        {children}
+      </Link>
+    </div>
   );
 }
