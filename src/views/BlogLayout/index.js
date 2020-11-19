@@ -1,54 +1,21 @@
 import React from 'react';
-import {  
-  GridLayout,
-  DosCommand,
-  BuildAndPush,
-  DockerfileConfigAnalyse,
-  CanalBinlogOutOfSync,
-  DeferAsyncAndDOMContentloaded,
-  ForInAndForOf,
-  KoaAppContext,
-  SequelizeCliUse,
-  YouDonotKnownViod0,
-  NginxConfigAnalyse,
-  ReactWorkingPrinciple,
-  CreatingImmutableObjects,
-  UbuntuExpansion} from '../../note';
+import { useRouteMatch } from 'react-router-dom';
+import * as note from '../../note';
+import Navbar from '../../components/Navbar';
 
 export default BlogLayout;
 
 function BlogLayout() {
+  const match = useRouteMatch();
+
+  const Details = note[match.params.details];
 
   return(
-    <div className='markdown bloglayout'>
-      <GridLayout/>
-      <hr />
-      <DosCommand/>
-      <hr />
-      <BuildAndPush/>
-      <hr />
-      <DockerfileConfigAnalyse/>
-      <hr />
-      <CanalBinlogOutOfSync/>
-      <hr />
-      <DeferAsyncAndDOMContentloaded/>
-      <hr />
-      <ForInAndForOf/>
-      <hr />
-      <KoaAppContext/>
-      <hr />
-      <SequelizeCliUse/>
-      <hr />
-      <YouDonotKnownViod0/>
-      <hr />
-      <NginxConfigAnalyse/>
-      <hr />
-      <ReactWorkingPrinciple/>
-      <hr />
-      <CreatingImmutableObjects/>
-      <hr />
-      <UbuntuExpansion/>
-      <hr />
+    <div className='blog-layout'>
+      <Navbar  />
+      <div className='markdown bloglayout'>
+        {Details && <Details/>}
+      </div>
     </div>
   );
 }

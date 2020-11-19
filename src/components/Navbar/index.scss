@@ -6,12 +6,15 @@
     min-height: 30px;
     padding: 10px;
 
-    .navbar-logo {
+    .navbar-logo a,
+    .navbar-logo a:active
+    .navbar-logo a:hover{ 
       text-transform: uppercase;
       font-size: 25px;
       font-weight: bolder;
       cursor: pointer;
       color: hsla(179, 100%, 40%, .9);
+      text-decoration: none;
     }
     .navbar-link-list {
       display: flex;
