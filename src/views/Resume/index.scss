@@ -1,0 +1,55 @@
+.resume {
+  font: 12px/1.5 Helvetica Neue,Arial,PingFang SC,Microsoft YaHei,SimSun,sans-serif;
+  // index,js
+
+
+  // Content.js
+  .resume-content {
+    margin: 30px auto;
+    font-size: 13px;
+    width: 820px;
+    height: 1150px;
+
+    .details-description {
+      padding: 10px;
+      display: flex;
+      justify-content: flex-start;
+      flex-flow: column nowrap;
+
+      .list-top {
+        padding: 4px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        b {
+          font-weight: bold;
+        }
+      }
+
+      &>li {
+        padding: 4px 0;
+        font-weight: 400;
+        &::before {
+          content: '\2022';
+          color: #636e72;
+          padding-right: 4px;
+        }
+      }
+    }
+
+    .weiruanyahei {
+      font-family: Microsoft YaHei;
+
+      .myname {
+        font-size: 22px;
+      }
+    }
+  }
+
+  // InputDetails.js
+
+
+  // Sidebar.js
+}
+

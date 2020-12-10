@@ -20,7 +20,9 @@
       display: flex;
       justify-content: flex-end;
 
-      div {
+      div a,
+      div a:active,
+      div a:hover {
         margin: 10px;
         text-transform: uppercase;
         cursor: pointer;
@@ -29,6 +31,7 @@
         font-weight: 400;
         letter-spacing: 2px;
         transition: color .3s ease-in;
+        text-decoration: none;
         &:hover {
           color: #95afc0;
         }
@@ -39,10 +42,10 @@
   .navbar-fixed {
     background-color: #fff;
     box-shadow: 0 15px 10px -10px #bbb;
-    .navbar-logo {
+    .navbar-logo a {
       color: hsla(179, 100%, 40%, .5);
     }
-    .navbar-link-list div {
+    .navbar-link-list div a {
       color: #636e72;
     }
   }

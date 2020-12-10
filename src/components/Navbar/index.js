@@ -11,10 +11,10 @@ const Navbar =  forwardRef(({navbarClassName}, navbarRef) => {
           <div className={`navbar-items ${navbarClassName}`} ref={navbarRef}>
             <div className='navbar-logo'><Link to='/'>yanxiaolazy</Link></div>
             <div className='navbar-link-list'>
-              <div>about</div>
-              <div>blog</div>
-              <div>index</div>
-              <div>resume</div>
+              <div><Link to='/about'>about</Link></div>
+              <div><Link to='/blog'>blog</Link></div>
+              <div><Link to='/index'>index</Link></div>
+              <div><Link to='/resume'>resume</Link></div>
             </div>
           </div>
         </Affix>

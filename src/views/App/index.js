@@ -6,6 +6,7 @@ import {createHashHistory} from 'history';
 import Index from '../Index';
 import BlogLayout from '../BlogLayout';
 import Home from '../Home';
+import Resume from '../Resume';
 import './index.css';
 
 export default App;
@@ -19,6 +20,7 @@ function App() {
         <Route exact path='/' component={Home}/>
         <Route exact path='/index' component={Index} />
         <Route exact path='/blog/:details' component={BlogLayout}/>
+        <Route exact path='/resume' component={Resume}/>
         <Route component={NotFound}/>
       </Switch>
     </Router>

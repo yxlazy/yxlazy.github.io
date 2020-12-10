@@ -1,25 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {Card, Skeleton} from 'antd';
-import {Link, useHistory} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import Navbar from '../../components/Navbar';
-// import {
-//   GridLayout,
-//   DosCommand,
-//   BuildAndPush,
-//   DockerfileConfigAnalyse,
-//   CanalBinlogOutOfSync,
-//   DeferAsyncAndDOMContentloaded,
-//   ForInAndForOf,
-//   KoaAppContext,
-//   SequelizeCliUse,
-//   YouDonotKnownViod0,
-//   NginxConfigAnalyse,
-//   ReactWorkingPrinciple,
-//   CreatingImmutableObjects,
-//   UbuntuExpansion,
-//   CalleeAndCaller,
-//   ThisObject
-// } from '../../note';
 import './index.scss';
 import * as note from '../../note';
 
