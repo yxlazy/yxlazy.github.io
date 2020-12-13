@@ -23,6 +23,8 @@ import ReactWorkingPrinciple from './react/react 工作原理.md';
 import CreatingImmutableObjects from './translate/Creating immutable objects in native JavaScript.md';
 //ubuntu
 import UbuntuExpansion from './ubuntu/扩容.md';
+// mysql
+import ForgetPassword from './mysql/macbook pro安装mysql后忘记密码.md';
 
 export {
   GridLayout,
@@ -40,5 +42,6 @@ export {
   CreatingImmutableObjects,
   UbuntuExpansion,
   CalleeAndCaller,
-  ThisObject
+  ThisObject,
+  ForgetPassword
 }
