@@ -7,6 +7,7 @@ import DosCommand from './dos命令/停止被占用端口.md';
 import BuildAndPush from './docker/build and push to Dockr Hub.md';
 import DockerfileConfigAnalyse from './docker/Dockerfile简单配置分析.md';
 import CanalBinlogOutOfSync from './docker/坑：canal的binLog与mysql不同步.md';
+import { InstallDockerENGineAndDockerCompose } from "./docker/docker engine 和docker compose安装.md";
 //javascript
 import DeferAsyncAndDOMContentloaded from './js/defer async 和 DOMContentLoaded.md';
 import ForInAndForOf from './js/for-in和for-of.md';
@@ -27,21 +28,39 @@ import UbuntuExpansion from './ubuntu/扩容.md';
 import ForgetPassword from './mysql/macbook pro安装mysql后忘记密码.md';
 
 export {
+  // css
   GridLayout,
+
+  // dos
   DosCommand,
+
+  // docker
   BuildAndPush,
   DockerfileConfigAnalyse,
   CanalBinlogOutOfSync,
+  InstallDockerENGineAndDockerCompose,
+
+  // javascript
   DeferAsyncAndDOMContentloaded,
   ForInAndForOf,
   KoaAppContext,
   SequelizeCliUse,
   YouDonotKnownViod0,
-  NginxConfigAnalyse,
-  ReactWorkingPrinciple,
-  CreatingImmutableObjects,
-  UbuntuExpansion,
   CalleeAndCaller,
   ThisObject,
+
+  // nginx
+  NginxConfigAnalyse,
+
+  // react
+  ReactWorkingPrinciple,
+
+  // translate
+  CreatingImmutableObjects,
+
+  // unbuntu
+  UbuntuExpansion,
+
+  // mysql
   ForgetPassword
 }
