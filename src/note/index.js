@@ -35,6 +35,9 @@ import UbuntuExpansion from './ubuntu/扩容.md';
 // mysql
 import ForgetPassword from './mysql/macbook pro安装mysql后忘记密码.md';
 
+//developer manual
+import WheelSet from './developer-manual/wheelSet.md';
+
 export {
   // css
   GridLayout,
@@ -71,5 +74,7 @@ export {
 
   // mysql
   ForgetPassword,
-
+  
+  //developer manual
+  WheelSet,
 }
