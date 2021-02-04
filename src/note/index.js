@@ -31,6 +31,7 @@ import CreatingImmutableObjects from './translate/Creating immutable objects in 
 
 //ubuntu
 import UbuntuExpansion from './ubuntu/扩容.md';
+import UseTarGzPackageInstallNodejs from "./ubuntu/使用tar.gz安装nodejs.md";
 
 // mysql
 import ForgetPassword from './mysql/macbook pro安装mysql后忘记密码.md';
@@ -74,6 +75,7 @@ export {
 
   // unbuntu
   UbuntuExpansion,
+  UseTarGzPackageInstallNodejs,
 
   // mysql
   ForgetPassword,
