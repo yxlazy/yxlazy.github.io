@@ -38,6 +38,9 @@ import ForgetPassword from './mysql/macbook pro安装mysql后忘记密码.md';
 //developer manual
 import WheelSet from './developer-manual/wheelSet.md';
 
+//curl
+import UseCurlInstallPackage from "./curl/使用curl安装包.md";
+
 export {
   // css
   GridLayout,
@@ -77,4 +80,7 @@ export {
   
   //developer manual
   WheelSet,
+
+  //curl
+  UseCurlInstallPackage,
 }
