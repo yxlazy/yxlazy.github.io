@@ -13,7 +13,7 @@ import InstallDockerENGineAndDockerCompose from "./docker/docker engine 和docke
 
 //javascript
 import DeferAsyncAndDOMContentloaded from './js/defer async 和 DOMContentLoaded.md';
-import ForInAndForOf from './js/for-in和for-of.md';
+import ForInAndForOf from './js/forEach, for-in和for-of.md';
 import KoaAppContext from './js/koa2 app.context.md';
 import SequelizeCliUse from './js/sequelize cli.md';
 import YouDonotKnownViod0 from './js/你不知道的viod 0.md';
