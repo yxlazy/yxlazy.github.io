@@ -1,6 +1,7 @@
 import './index.scss';
 //css
 import GridLayout from './css/网格布局（grid）.md';
+import SelfDefineScrollBar from "./css/添加自定义滚动条.md";
 
 //dos
 import DosCommand from './dos命令/停止被占用端口.md';
@@ -45,6 +46,7 @@ import UseCurlInstallPackage from "./curl/使用curl安装包.md";
 export {
   // css
   GridLayout,
+  SelfDefineScrollBar,
 
   // dos
   DosCommand,
