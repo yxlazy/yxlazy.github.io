@@ -1,0 +1,815 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/avatar.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yxlazy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="axios是一个轻量无依赖的Promise版的http请求库，不仅可以在浏览器端使用，也可以在node端使用，今天我们就来学习一下这款备受欢迎的库。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="axios源码学习">
+<meta property="og:url" content="https://www.yxlazy.xyz/2022/03/01/axios%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="YXLazy">
+<meta property="og:description" content="axios是一个轻量无依赖的Promise版的http请求库，不仅可以在浏览器端使用，也可以在node端使用，今天我们就来学习一下这款备受欢迎的库。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-01T15:33:53.000Z">
+<meta property="article:modified_time" content="2023-01-12T08:20:42.158Z">
+<meta property="article:author" content="yxlazy">
+<meta property="article:tag" content="源码解析">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>axios源码学习 - YXLazy</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"www.yxlazy.xyz","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"8514c4ed7d7682442371b277e8bfea43","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+
+
+  
+
+  
+    <!-- 谷歌广告 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5780181181798489" crossorigin="anonymous"></script>
+  
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="YXLazy" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>YXLazy</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/post-background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="axios源码学习"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        yxlazy
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-03-01 23:33" pubdate>
+          2022年3月1日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">axios源码学习</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2023年1月12日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <p><code>axios</code>是一个轻量无依赖的<code>Promise</code>版的<code>http</code>请求库，不仅可以在浏览器端使用，也可以在node端使用，今天我们就来学习一下这款备受欢迎的库。</p>
+<p>在使用<code>axios</code>时，我们可以通过以下方式发起一个<code>axios</code>请求</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-title function_">axios</span>(&#123;&#125;)<br><span class="hljs-keyword">new</span> axios.<span class="hljs-title class_">Axios</span>(&#123;&#125;)<br>axios.<span class="hljs-title function_">create</span>(&#123;&#125;)<br>axios[<span class="hljs-string">&#x27;get&#x27;</span>]()<br></code></pre></td></tr></table></figure>
+<p>其实最后都是调用的<code>Axios.prototype.request</code>方法，我们可以看一下<code>createInstance()</code>这个函数到底做了什么，可以看到，这个函数主要就是用户创建一个<code>axios</code>对象：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">createInstance</span>(<span class="hljs-params">defaultConfig</span>) &#123;<br>  <span class="hljs-comment">// 创建一个axios对象</span><br>  <span class="hljs-keyword">var</span> context = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Axios</span>(defaultConfig);<br>  <span class="hljs-comment">// 绑定Axios.prototype.request中的this并创建一个instance变量</span><br>  <span class="hljs-keyword">var</span> instance = <span class="hljs-title function_">bind</span>(<span class="hljs-title class_">Axios</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">request</span>, context);<br>  <span class="hljs-comment">// 将Axios原型对象扩展到instance上，并绑定this</span><br>  <span class="hljs-comment">// Copy axios.prototype to instance</span><br>  utils.<span class="hljs-title function_">extend</span>(instance, <span class="hljs-title class_">Axios</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>, context);<br>  <span class="hljs-comment">// 将axios对象上的属性扩展到instance上</span><br>  <span class="hljs-comment">// Copy context to instance</span><br>  utils.<span class="hljs-title function_">extend</span>(instance, context);<br><br>  <span class="hljs-comment">// 暴露出一个create方法，可以通过这个方法创建axios对象</span><br>  <span class="hljs-comment">// Factory for creating new instances</span><br>  instance.<span class="hljs-property">create</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">create</span>(<span class="hljs-params">instanceConfig</span>) &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-title function_">createInstance</span>(<span class="hljs-title function_">mergeConfig</span>(defaultConfig, instanceConfig));<br>  &#125;;<br>  <span class="hljs-comment">// 返回instance对象，这个就是新的axios对象了</span><br>  <span class="hljs-keyword">return</span> instance;<br>&#125;<br><span class="hljs-comment">// 新的axios对象</span><br><span class="hljs-keyword">var</span> axios = <span class="hljs-title function_">createInstance</span>(defaults);<br><span class="hljs-comment">// Axios构造函数绑定到axios上</span><br>axios.<span class="hljs-property">Axios</span> = <span class="hljs-title class_">Axios</span>;<br></code></pre></td></tr></table></figure>
+<p>下面我们着重看一下<code>Axios.prototype.request</code>方法, 方法前面部分都是对配置的一些处理（就不细讲了），<br>然后从这里开始（也就是下面代码所示），这是<code>axios</code>的拦截器处理。</p>
+<p>首先看一下请求拦截器：<br>请求拦截器会依次将<code>interceptor.fulfilled</code>和<code>interceptor.rejected</code>往数组（<code>requestInterceptorChain</code>）的前面放</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// lib\core\Axios.js</span><br><span class="hljs-comment">// 用于存储请求拦截器的回调</span><br>  <span class="hljs-keyword">var</span> requestInterceptorChain = [];<br>  <span class="hljs-comment">// 在对请求拦截器进行处理时，是采用同步处理方式还是采用异步处理的方式，默认在没有添加拦截器时时同步，添加拦截器后是异步</span><br>  <span class="hljs-keyword">var</span> synchronousRequestInterceptors = <span class="hljs-literal">true</span>;<br>  <span class="hljs-comment">// 遍历添加的拦截器</span><br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">interceptors</span>.<span class="hljs-property">request</span>.<span class="hljs-title function_">forEach</span>(<span class="hljs-keyword">function</span> <span class="hljs-title function_">unshiftRequestInterceptors</span>(<span class="hljs-params">interceptor</span>) &#123;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> interceptor.<span class="hljs-property">runWhen</span> === <span class="hljs-string">&#x27;function&#x27;</span> &amp;&amp; interceptor.<span class="hljs-title function_">runWhen</span>(config) === <span class="hljs-literal">false</span>) &#123;<br>      <span class="hljs-keyword">return</span>;<br>    &#125;<br>  <span class="hljs-comment">// interceptor.synchronous来自添加拦截器时，所配置的选项</span><br>    synchronousRequestInterceptors = synchronousRequestInterceptors &amp;&amp; interceptor.<span class="hljs-property">synchronous</span>;<br>    <span class="hljs-comment">// 这里将每个迭代器以fulfilled和rejected为一组的形式，依次放到数组的前面</span><br>    requestInterceptorChain.<span class="hljs-title function_">unshift</span>(interceptor.<span class="hljs-property">fulfilled</span>, interceptor.<span class="hljs-property">rejected</span>);<br>  &#125;);<br></code></pre></td></tr></table></figure>
+<p>响应拦截器处理:<br>响应拦截器会依次将<code>interceptor.fulfilled</code>和<code>interceptor.rejected</code>往数组（<code>responseInterceptorChain</code>）的后面放</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// 用于存储响应拦截器的回调</span><br>  <span class="hljs-keyword">var</span> responseInterceptorChain = [];<br>  <span class="hljs-comment">// 遍历添加的拦截器</span><br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">interceptors</span>.<span class="hljs-property">response</span>.<span class="hljs-title function_">forEach</span>(<span class="hljs-keyword">function</span> <span class="hljs-title function_">pushResponseInterceptors</span>(<span class="hljs-params">interceptor</span>) &#123;<br>    <span class="hljs-comment">// 这里将每个迭代器以fulfilled和rejected为一组的形式，依次放到数组的后面</span><br>    responseInterceptorChain.<span class="hljs-title function_">push</span>(interceptor.<span class="hljs-property">fulfilled</span>, interceptor.<span class="hljs-property">rejected</span>);<br>  &#125;);<br></code></pre></td></tr></table></figure>
+
+<p>为什么会如此放置呢？在讨论这个问题之前，我们先来看一下这个拦截器（interceptors）是怎么存放我们注册的拦截器的。拦截器是在我们创建axios实例的时候创建的，它们都是同一个构造函数的两个不同的实例：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// lib\core\Axios.js</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">Axios</span>(<span class="hljs-params">instanceConfig</span>) &#123;<br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">defaults</span> = instanceConfig;<br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">interceptors</span> = &#123;<br>    <span class="hljs-comment">// 创建一个请求拦截器对象</span><br>    <span class="hljs-attr">request</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">InterceptorManager</span>(),<br>    <span class="hljs-comment">// 创建一个响应拦截器对象</span><br>    <span class="hljs-attr">response</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">InterceptorManager</span>()<br>  &#125;;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>拦截器的构造函数。当我们在调用axios.interceptors.request.use()时，其实就是向这个this.handlers的末尾注册一个拦截器回调</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">//lib\core\InterceptorManager.js</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">InterceptorManager</span>(<span class="hljs-params"></span>) &#123;<br>  <span class="hljs-comment">// 存放添加的拦截器回调</span><br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">handlers</span> = [];<br>&#125;<br><br><span class="hljs-comment">// 注册拦截器</span><br><span class="hljs-title class_">InterceptorManager</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">use</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">use</span>(<span class="hljs-params">fulfilled, rejected, options</span>) &#123;<br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">handlers</span>.<span class="hljs-title function_">push</span>(&#123;<br>    <span class="hljs-attr">fulfilled</span>: fulfilled,<br>    <span class="hljs-attr">rejected</span>: rejected,<br>    <span class="hljs-attr">synchronous</span>: options ? options.<span class="hljs-property">synchronous</span> : <span class="hljs-literal">false</span>,<br>    <span class="hljs-attr">runWhen</span>: options ? options.<span class="hljs-property">runWhen</span> : <span class="hljs-literal">null</span><br>  &#125;);<br>  <span class="hljs-comment">// 返回一个已注册拦截器的id，用于注销添加的拦截器</span><br>  <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">handlers</span>.<span class="hljs-property">length</span> - <span class="hljs-number">1</span>;<br>&#125;;<br><br><span class="hljs-comment">// 这是上面迭代拦截器的方法，拦截器对象自己实现了一个迭代方法</span><br><span class="hljs-title class_">InterceptorManager</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">forEach</span> = <span class="hljs-keyword">function</span> <span class="hljs-title function_">forEach</span>(<span class="hljs-params">fn</span>) &#123;<br>  utils.<span class="hljs-title function_">forEach</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">handlers</span>, <span class="hljs-keyword">function</span> <span class="hljs-title function_">forEachHandler</span>(<span class="hljs-params">h</span>) &#123;<br>    <span class="hljs-keyword">if</span> (h !== <span class="hljs-literal">null</span>) &#123;<br>      <span class="hljs-title function_">fn</span>(h);<br>    &#125;<br>  &#125;);<br>&#125;;<br></code></pre></td></tr></table></figure>
+<p>接着我们来看下上面我们提出的问题，为什么会如此排列？<br>看代码上的注释</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// 用来保存上一次promise.then处理后的结果</span><br><span class="hljs-keyword">var</span> promise;<br><span class="hljs-comment">// 将请求拦截器处理放到promise中进行异步处理</span><br><span class="hljs-keyword">if</span> (!synchronousRequestInterceptors) &#123;<br>  <span class="hljs-comment">// 存储所有的操作，包括请求拦截器和响应拦截器的处理，dispatchRequest用来发起请求, 设置undefined是为了占位</span><br>  <span class="hljs-keyword">var</span> chain = [dispatchRequest, <span class="hljs-literal">undefined</span>];<br>  <span class="hljs-comment">// 请求拦截器和响应拦截器一前一后放入chain中</span><br>  <span class="hljs-title class_">Array</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">unshift</span>.<span class="hljs-title function_">apply</span>(chain, requestInterceptorChain);<br>  chain = chain.<span class="hljs-title function_">concat</span>(responseInterceptorChain);<br></code></pre></td></tr></table></figure>
+
+<p>这里做的处理，我觉得可以说是非常华丽了（一只菜汪路过）</p>
+<ol>
+<li><p>我们前面已经将所有的拦截器都放入了chain数组中，而且存放的格式是这样的<br><code>[fulfilled1, rejected1, fulfilled2, rejected2, ...dispatchRequest, undefined, fulfilled1, rejected1,fulfilled2, rejected2, ...]</code></p>
+</li>
+<li><p>这里通过一个while循环来遍历这个数组（也就是chain），并进行处理</p>
+</li>
+<li><p><code>promise = promise.then(chain.shift(), chain.shift());</code> 就是用来队列处理整个chain</p>
+</li>
+<li><p>第一次循环<code>promise = promise.then(fulfilled1, rejected1)</code>处理第一个拦截器回调，等处理结束后赋值给promise，</p>
+</li>
+<li><p>接着第二次进入循环<code>promise = promise.then(fulfilled2, rejected2)</code><br>…</p>
+</li>
+<li><p>当处理到<code>dispatchRequest, undefined</code>时，证明请求拦截器已经处理完成，开始发起请求，等请求结果回来，进入响应拦截器的处理</p>
+</li>
+<li><p><code>promise = promise.then(fulfilled1, rejected1)</code>，同样的依次进行每个拦截器的回调</p>
+</li>
+<li><p>最后返回这个经过请求拦截器处理，发起请求处理，和响应拦截器处理的结果 – promise</p>
+</li>
+</ol>
+<blockquote>
+<p>注：在处理请求拦截器时，<em>最先添加到请求拦截器的回调，会最后执行；相反，对于响应拦截器的处理是，最先添加到响应拦截器的回调最先执行</em></p>
+</blockquote>
+<p>几句代码，但这分量确实足（学到了）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs js">  promise = <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>(config);<br>  <span class="hljs-keyword">while</span> (chain.<span class="hljs-property">length</span>) &#123;<br>    promise = promise.<span class="hljs-title function_">then</span>(chain.<span class="hljs-title function_">shift</span>(), chain.<span class="hljs-title function_">shift</span>());<br>  &#125;<br><br>  <span class="hljs-keyword">return</span> promise;<br>&#125;<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>这里是把请求拦截处理当做异步来处理的，对于同步处理，是将整个处理分为了两部分进行处理的，第一部分是请求拦截器部分，是同步处理的，第二部分是发起请求的部分和响应拦截器部分合在一起进行异步处理，就和上面的一样了</p>
+</blockquote>
+<p>总结：可以看到在promise.then处理的时候，正好一个是fulfilled回调，一个是rejected回调，所以，我们将拦截器注册的回调也依次按这样排列就正好方便我们处理。不仅如此，我们将真正发起请求的处理也按着成对的逻辑并放置在中间，就能保证处理的顺序是按照：处理请求拦截器 &#x3D;&gt; 发起请求 &#x3D;&gt; 处理响应拦截器的顺序</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/other/" class="category-chain-item">other</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">#源码解析</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>axios源码学习</div>
+      <div>https://www.yxlazy.xyz/2022/03/01/axios源码学习/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yxlazy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年3月1日</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>更新于</div>
+          <div>2023年1月12日</div>
+        </div>
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/03/03/%E4%BD%BF%E7%94%A8husky+lint-staged%E8%A7%84%E8%8C%83%E4%BB%A3%E7%A0%81%E6%A0%BC%E5%BC%8F/" title="使用husky+lint-staged规范代码格式">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">使用husky+lint-staged规范代码格式</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/02/15/react-router%20v6%20api%E5%AD%A6%E4%B9%A0/" title="react-router v6 api学习">
+                        <span class="hidden-mobile">react-router v6 api学习</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  <!-- 灰色页面 -->
+
+
+
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?8514c4ed7d7682442371b277e8bfea43";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

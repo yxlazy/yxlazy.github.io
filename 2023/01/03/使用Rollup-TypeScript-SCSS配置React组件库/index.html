@@ -1,0 +1,839 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/avatar.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yxlazy">
+  <meta name="keywords" content="rollup,typescript,react library">
+  
+    <meta name="description" content="想写一个React的组件库，但不知道该如何配置一个开发环境？这篇文章将告诉你答案">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Rollup,TypeScript,SCSS配置React组件库">
+<meta property="og:url" content="https://www.yxlazy.xyz/2023/01/03/%E4%BD%BF%E7%94%A8Rollup-TypeScript-SCSS%E9%85%8D%E7%BD%AEReact%E7%BB%84%E4%BB%B6%E5%BA%93/index.html">
+<meta property="og:site_name" content="YXLazy">
+<meta property="og:description" content="想写一个React的组件库，但不知道该如何配置一个开发环境？这篇文章将告诉你答案">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-03T09:10:44.000Z">
+<meta property="article:modified_time" content="2023-01-12T08:20:42.166Z">
+<meta property="article:author" content="yxlazy">
+<meta property="article:tag" content="typescript">
+<meta property="article:tag" content="rollup">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>使用Rollup,TypeScript,SCSS配置React组件库 - YXLazy</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"www.yxlazy.xyz","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"8514c4ed7d7682442371b277e8bfea43","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+
+
+  
+
+  
+    <!-- 谷歌广告 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5780181181798489" crossorigin="anonymous"></script>
+  
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="YXLazy" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>YXLazy</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/post-background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="使用Rollup,TypeScript,SCSS配置React组件库"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        yxlazy
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-01-03 17:10" pubdate>
+          2023年1月3日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          52 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">使用Rollup,TypeScript,SCSS配置React组件库</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2023年1月12日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <blockquote>
+<p>本篇为翻译的文章，由于笔者能力有限，倘若阅读体验不好，可点击原文地址查看，原文地址：<a target="_blank" rel="noopener" href="https://www.codefeetime.com/post/rollup-config-for-react-component-library-with-typescript-scss/">Rollup Config for React Component Library With TypeScript + SCSS</a></p>
+</blockquote>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在这篇文章中，我将尝试覆盖在构建<code>React</code>组件库时使用<a target="_blank" rel="noopener" href="https://rollupjs.org/guide/en/"><code>Rollup</code></a>配置发挥作用的关键领域（特别是<code>TypeScript</code>和<code>SCSS</code>）。</p>
+<p>同时，我将会为使用到的<a target="_blank" rel="noopener" href="https://github.com/rollup/plugins"><code>Rollup</code>插件</a>写一些说明，来说明插件的作用。</p>
+<p>我绝对不是<code>Rollup</code>的大师，也不是构建<code>React</code>组件库的权威指南。我仅仅只是分享了用于构建我自己的<code>React</code>组件库（<a target="_blank" rel="noopener" href="https://github.com/DriLLFreAK100/codefee-kit">Codefee-Kit</a>）时的<code>Rollup</code>配置，这只是我自己的一个笔记，或许能帮到一些人。</p>
+<p>顺便说一下，组件库托管在<a target="_blank" rel="noopener" href="https://github.com/DriLLFreAK100/codefee-kit">Github</a>上</p>
+<h2 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h2><p>在此之前，我使用<code>webpack</code>去构建库。当时，我在获得第一个工作版本时遇到了很多麻烦。我仍然记得有个属性叫”library”，为了让<code>webpack</code>对库收集信息，你需要显示设置。我很傻，在我明白整个事情之前我在谷歌上搜索了很多信息。在整个踩坑过程中投入了大量时间。我当然不喜欢那里的配置文件的复杂性。嗯，是谁？哈哈哈</p>
+<p>尽管如此，当时的工作版本并没有得到很好的优化。我的意思是，没有配置任何代码分割，构建的输出总是一个越来越大的<code>index.js</code>文件</p>
+<p>最近，我终于又有了一些空闲时间！因此，我决定重新审视这个话题。在<code>Webpack</code>中对如何进行代码拆分进行了一些深挖，我只是觉得它太麻烦了。</p>
+<p>最后，我决定彻底停止，然后跳到另一个流行的构建库的选择——<code>Rollup</code>！而且，它的配置简单得多，而且节省了我很多时间！天啊，我为什么不早点跳过去？！去我的！</p>
+<p>有一句话是这样说的，”Rollup for libraries, Webpack for apps”。事实证明，在这一点上，它仍然非常重要！</p>
+<blockquote>
+<p>“Rollup for libraries, Webpack for apps” <a target="_blank" rel="noopener" href="https://medium.com/@PepsRyuu/why-i-use-rollup-and-not-webpack-e3ab163f4fd3">https:&#x2F;&#x2F;medium.com&#x2F;@PepsRyuu&#x2F;why-i-use-rollup-and-not-webpack-e3ab163f4fd3</a></p>
+</blockquote>
+<h2 id="主题范围"><a href="#主题范围" class="headerlink" title="主题范围"></a>主题范围</h2><p>请跳转到你感兴趣的部分</p>
+<ol>
+<li><a href="#rollup-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">Rollup 配置文件</a></li>
+<li><a href="#rollup-%E4%BB%A3%E7%A0%81%E5%88%86%E5%89%B2">Rollup 代码分割</a></li>
+<li><a href="#rollup-%E6%8F%92%E4%BB%B6%E8%AF%B4%E6%98%8E">Rollup 插件说明</a></li>
+</ol>
+<h3 id="Rollup-配置文件"><a href="#Rollup-配置文件" class="headerlink" title="Rollup 配置文件"></a>Rollup 配置文件</h3><p>这是适用于我的配置文件。那里有相当多的活动部件，但我尽可能地把它清理干净，这样就不会太伤眼睛了哈哈。。。😛</p>
+<p><strong>rollup.config.js</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">import</span> resolve <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@rollup/plugin-node-resolve&#x27;</span>;<br><span class="hljs-keyword">import</span> commonjs <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@rollup/plugin-commonjs&#x27;</span>;<br><span class="hljs-keyword">import</span> typescript <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@rollup/plugin-typescript&#x27;</span>;<br><br><span class="hljs-keyword">import</span> postcss <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;rollup-plugin-postcss&quot;</span>;<br><span class="hljs-keyword">import</span> visualizer <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;rollup-plugin-visualizer&#x27;</span>;<br><span class="hljs-keyword">import</span> &#123; terser &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;rollup-plugin-terser&#x27;</span>;<br><span class="hljs-keyword">import</span> &#123; getFiles &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./scripts/buildUtils&#x27;</span>;<br><br><span class="hljs-keyword">const</span> extensions = [<span class="hljs-string">&#x27;.js&#x27;</span>, <span class="hljs-string">&#x27;.ts&#x27;</span>, <span class="hljs-string">&#x27;.jsx&#x27;</span>, <span class="hljs-string">&#x27;.tsx&#x27;</span>];<br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> &#123;<br>  <span class="hljs-attr">input</span>: [<br>    <span class="hljs-string">&#x27;./src/index.ts&#x27;</span>,<br>    ...<span class="hljs-title function_">getFiles</span>(<span class="hljs-string">&#x27;./src/common&#x27;</span>, extensions),<br>    ...<span class="hljs-title function_">getFiles</span>(<span class="hljs-string">&#x27;./src/components&#x27;</span>, extensions),<br>    ...<span class="hljs-title function_">getFiles</span>(<span class="hljs-string">&#x27;./src/hooks&#x27;</span>, extensions),<br>    ...<span class="hljs-title function_">getFiles</span>(<span class="hljs-string">&#x27;./src/utils&#x27;</span>, extensions),<br>  ],<br>  <span class="hljs-attr">output</span>: &#123;<br>    <span class="hljs-attr">dir</span>: <span class="hljs-string">&#x27;dist&#x27;</span>,<br>    <span class="hljs-attr">format</span>: <span class="hljs-string">&#x27;esm&#x27;</span>,<br>    <span class="hljs-attr">preserveModules</span>: <span class="hljs-literal">true</span>,<br>    <span class="hljs-attr">preserveModulesRoot</span>: <span class="hljs-string">&#x27;src&#x27;</span>,<br>    <span class="hljs-attr">sourcemap</span>: <span class="hljs-literal">true</span>,<br>  &#125;,<br>  <span class="hljs-attr">plugins</span>: [<br>    <span class="hljs-title function_">resolve</span>(),<br>    <span class="hljs-title function_">commonjs</span>(),<br>    <span class="hljs-title function_">typescript</span>(&#123;<br>      <span class="hljs-attr">tsconfig</span>: <span class="hljs-string">&#x27;./tsconfig.build.json&#x27;</span>,<br>      <span class="hljs-attr">declaration</span>: <span class="hljs-literal">true</span>,<br>      <span class="hljs-attr">declarationDir</span>: <span class="hljs-string">&#x27;dist&#x27;</span>,<br>    &#125;),<br>    <span class="hljs-title function_">postcss</span>(),<br>    <span class="hljs-title function_">terser</span>(),<br>    <span class="hljs-title function_">visualizer</span>(&#123;<br>      <span class="hljs-attr">filename</span>: <span class="hljs-string">&#x27;bundle-analysis.html&#x27;</span>,<br>      <span class="hljs-attr">open</span>: <span class="hljs-literal">true</span>,<br>    &#125;),<br>  ],<br>  <span class="hljs-attr">external</span>: [<span class="hljs-string">&#x27;react&#x27;</span>, <span class="hljs-string">&#x27;react-dom&#x27;</span>],<br>&#125;;<br></code></pre></td></tr></table></figure>
+<p>正如你所看到的，为了让<code>Rollup</code>工作，你仅仅只需要导出一个<code>JSON</code>对象。当然，如果你有多个配置需要配置，你也能导出一个数组。例如构建不同的目标文件时，像<code>umd</code>,<code>cjs</code>等</p>
+<p>我在这里配置了4个属性：</p>
+<ul>
+<li><code>input</code> - 打包文件的入口。可以是字符串或者字符串数组</li>
+<li><code>output</code> - 打包文件的输出配置，例如配置打包输出的文件夹，配置<code>sourcemap</code>生成等</li>
+<li><code>plugins</code> - 外部包调用，帮助操作、更改构建行为，例如<code>TypeScript, SCSS</code>等</li>
+<li><code>external</code> - 不需要打包进构建包中的包，通常是指<code>peerDependencies</code>中设置的包，在我的例子中，，就是<code>react</code>和<code>react-dom</code>两个包</li>
+</ul>
+<h4 id="TypeScript-配置"><a href="#TypeScript-配置" class="headerlink" title="TypeScript 配置"></a>TypeScript 配置</h4><p>以下是我的<code>tsconfig</code>文件。我有2个，一个是<code>Rollup</code>用于构建，另一个类似于基本配置，主要是用于开发</p>
+<p>背后的原因是，我想排除我的<a target="_blank" rel="noopener" href="https://storybook.js.org/">Storybook stories files</a>被<code>TypeScript</code>转译。它只用于开发时，我需要<code>tsconfig</code>。因此，创建了一个带有<code>excludes</code>的单独的配置文件</p>
+<p><strong>tsconfig.build.json</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;extends&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;./tsconfig.json&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;exclude&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>    <span class="hljs-string">&quot;node_modules&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;build&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;dist&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;scripts&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;acceptance-tests&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;webpack&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;jest&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;src/stories/**&quot;</span><br>  <span class="hljs-punctuation">]</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>tsconfig.json</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;compilerOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;module&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;esnext&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;target&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;es5&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;lib&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-string">&quot;es6&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;dom&quot;</span> <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;sourceMap&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;jsx&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;react&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;moduleResolution&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;node&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;rootDir&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;src&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;noImplicitReturns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;noImplicitThis&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;noImplicitAny&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;strictNullChecks&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;esModuleInterop&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;baseUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;src/&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>      <span class="hljs-attr">&quot;common&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src/common/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>      <span class="hljs-attr">&quot;components&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src/components/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>      <span class="hljs-attr">&quot;hooks&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src/hooks/*&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>      <span class="hljs-attr">&quot;utils&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src/utils/*&quot;</span><span class="hljs-punctuation">]</span><br>    <span class="hljs-punctuation">&#125;</span><br>  <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;exclude&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>    <span class="hljs-string">&quot;node_modules&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;build&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;dist&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;scripts&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;acceptance-tests&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;webpack&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-string">&quot;jest&quot;</span><br>  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;types&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;typePatches&quot;</span><span class="hljs-punctuation">]</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="Rollup-代码分割"><a href="#Rollup-代码分割" class="headerlink" title="Rollup 代码分割"></a>Rollup 代码分割</h3><p>在上面的配置中，我实际上使用了Rollup的<a target="_blank" rel="noopener" href="https://rollupjs.org/guide/en/#code-splitting">代码分割 (code-splitting) </a>功能。</p>
+<p>如果您注意到，我导出的<code>JSON</code>对象中的<code>input</code>属性实际上是字符串数组，而不是单个字符串。这实际上告诉<code>Rollup</code>将这些字符串中的每一个作为构建的单独入口点。所以，这就是代码分割构建。</p>
+<p>数组中的所有这些字符串实际上是我在<code>src</code>文件夹中拥有的单个<code>.ts</code>和<code>.tsx</code>文件的相对路径。<code>getFiles</code>方法是我编写的一个实用方法，它帮助我深入检索所有扩展名为<code>.js、.jsx、.ts</code>和<code>.tsx</code>的文件。</p>
+<p>下面是<a target="_blank" rel="noopener" href="https://github.com/DriLLFreAK100/codefee-kit/blob/main/scripts/buildUtils.js"><code>getFiles</code></a>方法的代码:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);<br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">getFiles</span> = (<span class="hljs-params">entry, extensions = [], excludeExtensions = []</span>) =&gt; &#123;<br>  <span class="hljs-keyword">let</span> fileNames = [];<br>  <span class="hljs-keyword">const</span> dirs = fs.<span class="hljs-title function_">readdirSync</span>(entry);<br><br>  dirs.<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">dir</span>) =&gt;</span> &#123;<br>    <span class="hljs-keyword">const</span> path = <span class="hljs-string">`<span class="hljs-subst">$&#123;entry&#125;</span>/<span class="hljs-subst">$&#123;dir&#125;</span>`</span>;<br><br>    <span class="hljs-keyword">if</span> (fs.<span class="hljs-title function_">lstatSync</span>(path).<span class="hljs-title function_">isDirectory</span>()) &#123;<br>      fileNames = [<br>        ...fileNames,<br>        ...<span class="hljs-title function_">getFiles</span>(path, extensions, excludeExtensions),<br>      ];<br><br>      <span class="hljs-keyword">return</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">if</span> (!excludeExtensions.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">exclude</span>) =&gt;</span> dir.<span class="hljs-title function_">endsWith</span>(exclude))<br>      &amp;&amp; extensions.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">ext</span>) =&gt;</span> dir.<span class="hljs-title function_">endsWith</span>(ext))<br>    ) &#123;<br>      fileNames.<span class="hljs-title function_">push</span>(path);<br>    &#125;<br>  &#125;);<br><br>  <span class="hljs-keyword">return</span> fileNames;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<h3 id="Rollup-插件说明"><a href="#Rollup-插件说明" class="headerlink" title="Rollup 插件说明"></a>Rollup 插件说明</h3><p>以下是我在上面的配置文件中使用的插件，以及使用它们后我的一些解释和理解。</p>
+<p><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/@rollup/plugin-node-resolve">@rollup&#x2F;plugin-node-resolve</a> </p>
+<p>对于<code>Rollup</code>，在<code>node_modules</code>中查找和捆绑第三方依赖项。这里所指的依赖关系是<code>package.json</code>文件中列出的依赖关系(<code>dependencies</code>)。</p>
+<p><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/@rollup/plugin-commonjs">@rollup&#x2F;plugin-commonjs</a> </p>
+<p>对于<code>Rollup</code>，将<code>CommonJS</code>模块转换为<code>ES6</code>，以便将其包含在<code>Rollup</code>捆绑包中。它通常与<code>@rollup/plugin-node-resolve</code> 一起使用，以捆绑<code>CommonJS</code>依赖项。</p>
+<p><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/@rollup/plugin-typescript">@rollup&#x2F;plugin-typescript</a> </p>
+<p>帮助以更简单的方式与<code>TypeScript</code>集成。包括将<code>TypeScript</code>转换为<code>JavaScript</code>等内容。</p>
+<p><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/rollup-plugin-postcss">rollup-plugin-postcss</a></p>
+<p>与<code>PostCSS</code>集成。对于我的用例，它有助于将<code>CSS</code>和<code>SCSS</code>文件分别构建为<code>*.CSS.js</code>和<code>*.SCSS.js</code>文件。然后，当导入相应的组件时，这些文件会相应地注入<code>HTML head</code>标签（依赖于<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/style-inject">style-inject</a>）</p>
+<blockquote>
+<p>在我目前的开发中，我已经改用样式化组件，而倾向于在<code>JS</code>模式中尝试<code>CSS</code>。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/rollup-plugin-visualizer">rollup-plugin-visualizer</a></p>
+<p>此插件用于帮助我们分析捆绑输出。它将为我们的检查生成一个很酷的可视化。在进行捆绑包大小优化时，它特别有用，因为它可以让我们可视化捆绑包文件的各个大小。</p>
+<p><a target="_blank" rel="noopener" href="https://www.npmjs.com/package/rollup-plugin-terser">rollup-plugin-terser</a></p>
+<p>它基本上是一个插件，用于集成<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/terser">terser</a>的用法。它有助于缩小和压缩我们的输出<code>JavaScript</code>文件。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在使用<code>Rollup</code>和<code>Webpack</code>构建使用<code>TypeScript</code>和<code>SCSS</code>的<code>React</code>组件库之后。。。我不得不说，只是为了这个目的而疯狂地使用<code>Rollup</code>。与<code>Webpack</code>相比，它更易于配置。</p>
+<p>单是配置的复杂性就足以让我跳过去。我希望有一个配置文件，我可以在任何时间点轻松推理，而不是一些冗长复杂的东西，我可能会在几周内忘记正在做什么！</p>
+<p>然而，我可能不一定对应用程序开发有同样的感觉，因为<code>Webpack</code>具有真正强大的热模块替换功能。这绝对是一个救命稻草，也是应用程序开发的必备工具。</p>
+<p>构建工具的前景正在发生变化，如果第二天出现另一个事实上的<code>bundler</code>，并在社区中掀起风暴，这可能并不奇怪！但至少现在，<code>Rollup</code>是我的新情人😛</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://github.com/rollup/plugins">https://github.com/rollup/plugins</a></li>
+<li><a target="_blank" rel="noopener" href="https://rollupjs.org/guide/en/">https://rollupjs.org/guide/en/</a></li>
+<li><a target="_blank" rel="noopener" href="https://marcobotto.com/blog/compiling-and-bundling-typescript-libraries-with-webpack/">https://marcobotto.com/blog/compiling-and-bundling-typescript-libraries-with-webpack/</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/HarveyD/react-component-library">https://github.com/HarveyD/react-component-library</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/rollup/rollup-plugin-commonjs">https://github.com/rollup/rollup-plugin-commonjs</a></li>
+</ol>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/typescript/" class="category-chain-item">typescript</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/typescript/">#typescript</a>
+      
+        <a href="/tags/rollup/">#rollup</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>使用Rollup,TypeScript,SCSS配置React组件库</div>
+      <div>https://www.yxlazy.xyz/2023/01/03/使用Rollup-TypeScript-SCSS配置React组件库/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yxlazy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年1月3日</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>更新于</div>
+          <div>2023年1月12日</div>
+        </div>
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/11/19/%E4%BD%BF%E7%94%A8puppeteer%E8%8E%B7%E5%8F%96%E7%BD%91%E9%A1%B5%E4%BF%A1%E6%81%AF/" title="使用puppeteer获取网页信息">
+                        <span class="hidden-mobile">使用puppeteer获取网页信息</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  <!-- 灰色页面 -->
+
+
+
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?8514c4ed7d7682442371b277e8bfea43";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

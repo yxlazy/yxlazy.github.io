@@ -1,0 +1,836 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/avatar.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yxlazy">
+  <meta name="keywords" content="node,nodejs,websocket,nodejs-websocket,源码解析">
+  
+    <meta name="description" content="本文将通过对nodejs-websocket的源码进行解析，从而深入的搞懂websocket是如何工作的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用nodejs创建websocket">
+<meta property="og:url" content="https://www.yxlazy.xyz/2022/10/13/%E4%BD%BF%E7%94%A8nodejs%E5%88%9B%E5%BB%BAwebsocket/index.html">
+<meta property="og:site_name" content="YXLazy">
+<meta property="og:description" content="本文将通过对nodejs-websocket的源码进行解析，从而深入的搞懂websocket是如何工作的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-10-13T06:12:14.000Z">
+<meta property="article:modified_time" content="2023-01-12T08:20:42.166Z">
+<meta property="article:author" content="yxlazy">
+<meta property="article:tag" content="源码解析">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>使用nodejs创建websocket - YXLazy</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"www.yxlazy.xyz","root":"/","version":"1.9.1","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"8514c4ed7d7682442371b277e8bfea43","google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+
+
+  
+
+  
+    <!-- 谷歌广告 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5780181181798489" crossorigin="anonymous"></script>
+  
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="YXLazy" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>YXLazy</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/post-background.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="使用nodejs创建websocket"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        yxlazy
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-10-13 14:12" pubdate>
+          2022年10月13日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          20k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          167 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">使用nodejs创建websocket</h1>
+            
+              <p class="note note-info">
+                
+                  
+                    本文最后更新于：2023年1月12日 下午
+                  
+                
+              </p>
+            
+            <div class="markdown-body">
+              
+              <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文主题是阅读<code>nodejs-websocket</code>库的源码，进而搞懂<code>websocket</code>的实现方式，并通过自己手写搭建一个简单的<code>websocket</code>服务</p>
+<p><code>Web Scoket</code>是一个基于<code>TCP</code>协议的全双工的通信方式，当建立链接后，其服务端可以直接发起对客户端的通信</p>
+<h2 id="工作方式"><a href="#工作方式" class="headerlink" title="工作方式"></a>工作方式</h2><p>要建立一个<code>Web Socket</code>链接，首先需要通过<code>HTTP</code>进行握手，在握手成功后，切换协议方式（<code>HTTP</code>切换成 <code>Web Socket</code>协议），链接建立成功，就可以开始通信了。</p>
+<p>在握手时，客户端需要在请求报文中注明自己需要切换协议为<code>Web Socket</code>协议（在<code>Web Socket</code>中，我们不需要关注请求报文，因为当我们通过 <code>new WebSocket(ws://example.com/test)</code>，创建实例时，浏览器会在内部为我们处理请求的报文）</p>
+<blockquote>
+<p>同源策略不适用于<code>Web Socket</code></p>
+</blockquote>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs http"><span class="hljs-keyword">GET</span> <span class="hljs-string">/test</span> <span class="hljs-meta">HTTP/1.1</span><br><span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>Upgrade<br><span class="hljs-attribute">Upgrade</span><span class="hljs-punctuation">: </span>websocket<br><span class="hljs-attribute">Sec-WebSocket-Version</span><span class="hljs-punctuation">: </span>13<br><span class="hljs-attribute">Sec-WebSocket-Key</span><span class="hljs-punctuation">: </span>udGGqBU9BqSiThHTKc0B6g==<br></code></pre></td></tr></table></figure>
+
+<p>当服务端收到新的<code>Web Scoket</code>链接时，判断当前发起的是<code>Web Socket</code>链接后，然后需要返回一个响应报文，来告诉客户端切换到<code>Web Socket</code>协议</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs http"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">101</span> Switching Protocols<br><span class="hljs-attribute">Upgrade</span><span class="hljs-punctuation">: </span>websocket<br><span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>Upgrade<br><span class="hljs-attribute">Sec-WebSocket-Accept</span><span class="hljs-punctuation">: </span>4UCGeYLdUGEUaei+36wTyP60Mcg=<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li><code>HTTP 101</code> 状态码英文名称是<code>Switching Protocols</code>，表示切换协议。服务器根据客户端的请求切换协议。只能切换到更高级的协议</li>
+<li><code>Sec-WebSocket-Accept</code> 用以告知服务器愿发起一个 <code>websocket</code> 连接。<code>Sec-WebSocket-Accept</code>的计算方法：<code>base64(hsa1(sec-websocket-key + 258EAFA5-E914-47DA-95CA-C5AB0DC85B11))</code>。参考：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/67784701">https://www.zhihu.com/question/67784701</a></li>
+</ul>
+</blockquote>
+<h2 id="源码解读"><a href="#源码解读" class="headerlink" title="源码解读"></a>源码解读</h2><blockquote>
+<p>以下只列出了关键性代码</p>
+</blockquote>
+<h3 id="握手"><a href="#握手" class="headerlink" title="握手"></a>握手</h3><p><code>Server</code>类，用于创建一个<code>server</code>示例，同时在构造函数中做一些前置处理</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">Server</span>(<span class="hljs-params">secure, options, callback</span>) &#123;<br>  <span class="hljs-comment">// 内部server，收到一个&quot;connection&quot;事件后调用</span><br>  <span class="hljs-comment">// 这个事件是nodejs 服务的事件，与下面触发的&quot;connection&quot;事件不是一个</span><br>	<span class="hljs-keyword">var</span> onConnection = <span class="hljs-keyword">function</span> (<span class="hljs-params">socket</span>) &#123;<br>    <span class="hljs-comment">// 创建一个连接后的实例，用于收发数据，错误处理等</span><br>    <span class="hljs-comment">// 看下面的介绍</span><br>		<span class="hljs-keyword">var</span> conn = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Connection</span>(socket, that, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>			that.<span class="hljs-property">connections</span>.<span class="hljs-title function_">push</span>(conn)<br>			conn.<span class="hljs-title function_">removeListener</span>(<span class="hljs-string">&#x27;error&#x27;</span>, nop)<br>			that.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&#x27;connection&#x27;</span>, conn)<br>		&#125;)<br>    <span class="hljs-comment">// 连接关闭后移除当前链接</span><br>		conn.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;close&#x27;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>			<span class="hljs-keyword">var</span> pos = that.<span class="hljs-property">connections</span>.<span class="hljs-title function_">indexOf</span>(conn)<br>			<span class="hljs-keyword">if</span> (pos !== -<span class="hljs-number">1</span>) &#123;<br>				that.<span class="hljs-property">connections</span>.<span class="hljs-title function_">splice</span>(pos, <span class="hljs-number">1</span>)<br>			&#125;<br>		&#125;)<br><br>		<span class="hljs-comment">// Ignore errors before the connection is established</span><br>		conn.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;error&#x27;</span>, nop)<br>	&#125;<br>  <span class="hljs-comment">// 创建一个内部的server实例</span><br>  <span class="hljs-keyword">if</span> (secure) &#123;<br>    <span class="hljs-comment">// 创建wss服务</span><br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span> = tls.<span class="hljs-title function_">createServer</span>(options, onConnection)<br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>    <span class="hljs-comment">// 创建ws服务</span><br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span> = net.<span class="hljs-title function_">createServer</span>(options, onConnection)<br>	&#125;<br>  <span class="hljs-comment">// 保存已连接的web socket</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">connections</span> = []<br><br>	<span class="hljs-comment">// 继承时this绑定</span><br>	events.<span class="hljs-property">EventEmitter</span>.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>)<br>	<span class="hljs-keyword">if</span> (callback) &#123;<br>    <span class="hljs-comment">// 当web socket 链接后调用</span><br>    <span class="hljs-comment">// connection事件是自己实现的</span><br>		<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;connection&#x27;</span>, callback)<br>	&#125;<br>&#125;<br><span class="hljs-comment">// 继承events.EventEmitter</span><br>util.<span class="hljs-title function_">inherits</span>(<span class="hljs-title class_">Server</span>, events.<span class="hljs-property">EventEmitter</span>)<br></code></pre></td></tr></table></figure>
+<p><code>server.listen()</code> 用于开启<code>Web Socket</code>服务</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">Server</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">listen</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">port, host, callback</span>) &#123;<br>	<span class="hljs-keyword">if</span> (callback) &#123;<br>		<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;listening&#x27;</span>, callback)<br>	&#125;<br>  <span class="hljs-comment">// 开启服务，此时可以通过连接访问了</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span>.<span class="hljs-title function_">listen</span>(port, host, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>		that.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&#x27;listening&#x27;</span>)<br>	&#125;)<br><br>	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><code>Connection</code>类，是整个模块的核心，用于处理<code>Web Socket</code>的“握手”，以及“握手”成功后对数据的处理和异常的处理</p>
+<blockquote>
+<p>只看被作为服务端来使用时的处理</p>
+</blockquote>
+<p><code>Connection</code>构造函数，数据初始化，绑定<code>net.Socket</code>的<code>readable</code>事件，用于对进来的请求做处理</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">Connection</span>(<span class="hljs-params">socket, parentOrOptions, callback</span>) &#123;<br>	<span class="hljs-keyword">var</span> that = <span class="hljs-variable language_">this</span>,<br>		connectEvent<br>  <span class="hljs-comment">// 初始化</span><br>  <span class="hljs-comment">// Server-side connection</span><br>  <span class="hljs-comment">// Server 实例</span><br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">server</span> = parentOrOptions<br>  <span class="hljs-comment">// websocket 的url</span><br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">path</span> = <span class="hljs-literal">null</span><br>  <span class="hljs-comment">// websocket 的host</span><br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">host</span> = <span class="hljs-literal">null</span><br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">extraHeaders</span> = <span class="hljs-literal">null</span><br>  <span class="hljs-variable language_">this</span>.<span class="hljs-property">protocols</span> = []<br><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">protocol</span> = <span class="hljs-literal">undefined</span><br>  <span class="hljs-comment">// net.Socket 的实例</span><br>  <span class="hljs-comment">// https://nodejs.org/dist/latest-v18.x/docs/api/net.html#event-connection</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span> = socket<br>  <span class="hljs-comment">// 连接状态</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">CONNECTING</span><br>  <span class="hljs-comment">// 已接收数据</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span> = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">alloc</span>(<span class="hljs-number">0</span>)<br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> = <span class="hljs-literal">null</span> <span class="hljs-comment">// string for text frames and InStream for binary frames</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">outStream</span> = <span class="hljs-literal">null</span> <span class="hljs-comment">// current allocated OutStream object for sending binary frames</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">key</span> = <span class="hljs-literal">null</span> <span class="hljs-comment">// the Sec-WebSocket-Key header</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span> = &#123;&#125; <span class="hljs-comment">// read only map of header names and values. Header names are lower-cased</span><br><br>	<span class="hljs-comment">// 入口，在这里读数据，包括“握手”和后面接收数据</span><br>	socket.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;readable&#x27;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>		that.<span class="hljs-title function_">doRead</span>()<br>	&#125;)<br>  <span class="hljs-comment">// 错误处理</span><br>	socket.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;error&#x27;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">err</span>) &#123;<br>		that.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&#x27;error&#x27;</span>, err)<br>	&#125;)<br><br>	<span class="hljs-comment">// Close listeners</span><br>  <span class="hljs-comment">// 连接关闭，状态重置</span><br>	<span class="hljs-keyword">var</span> onclose = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>		<span class="hljs-keyword">if</span> (that.<span class="hljs-property">readyState</span> === that.<span class="hljs-property">CONNECTING</span> || that.<span class="hljs-property">readyState</span> === that.<span class="hljs-property">OPEN</span>) &#123;<br>			that.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&#x27;close&#x27;</span>, <span class="hljs-number">1006</span>, <span class="hljs-string">&#x27;&#x27;</span>)<br>		&#125;<br>		that.<span class="hljs-property">readyState</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">CLOSED</span><br>		<span class="hljs-keyword">if</span> (that.<span class="hljs-property">frameBuffer</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">InStream</span>) &#123;<br>			that.<span class="hljs-property">frameBuffer</span>.<span class="hljs-title function_">end</span>()<br>			that.<span class="hljs-property">frameBuffer</span> = <span class="hljs-literal">null</span><br>		&#125;<br>		<span class="hljs-keyword">if</span> (that.<span class="hljs-property">outStream</span> <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">OutStream</span>) &#123;<br>			that.<span class="hljs-property">outStream</span>.<span class="hljs-title function_">end</span>()<br>			that.<span class="hljs-property">outStream</span> = <span class="hljs-literal">null</span><br>		&#125;<br>	&#125;<br>	socket.<span class="hljs-title function_">once</span>(<span class="hljs-string">&#x27;close&#x27;</span>, onclose)<br>	socket.<span class="hljs-title function_">once</span>(<span class="hljs-string">&#x27;finish&#x27;</span>, onclose)<br><br>	<span class="hljs-comment">// 继承时this绑定</span><br>	events.<span class="hljs-property">EventEmitter</span>.<span class="hljs-title function_">call</span>(<span class="hljs-variable language_">this</span>)<br>	<span class="hljs-keyword">if</span> (callback) &#123;<br>		<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">once</span>(<span class="hljs-string">&#x27;connect&#x27;</span>, callback)<br>	&#125;<br>&#125;<br><span class="hljs-comment">// 继承events.EventEmitter</span><br>util.<span class="hljs-title function_">inherits</span>(<span class="hljs-title class_">Connection</span>, events.<span class="hljs-property">EventEmitter</span>)<br><br></code></pre></td></tr></table></figure>
+
+<p><code>Connection.prototype.doRead()</code>是所有请求的入口函数，用于处理“握手”，以及数据读取</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">Connection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">doRead</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> buffer, temp<br><br>	<span class="hljs-comment">// Fetches the data</span><br>  <span class="hljs-comment">// 从内部缓存区读取数据</span><br>	buffer = <span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span>.<span class="hljs-title function_">read</span>()<br>	<span class="hljs-keyword">if</span> (!buffer) &#123;<br>		<span class="hljs-comment">// Waits for more data</span><br>		<span class="hljs-keyword">return</span><br>	&#125;<br><br>	<span class="hljs-comment">// Save to the internal buffer</span><br>  <span class="hljs-comment">// 保存当前进来的数据</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span> = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">concat</span>([<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>, buffer], <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-property">length</span> + buffer.<span class="hljs-property">length</span>)<br>  <span class="hljs-comment">// 如果连接状态为正在连接</span><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> === <span class="hljs-variable language_">this</span>.<span class="hljs-property">CONNECTING</span>) &#123;<br>    <span class="hljs-comment">// 握手处理</span><br>		<span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">readHandshake</span>()) &#123;<br>			<span class="hljs-comment">// May have failed or we&#x27;re waiting for more data</span><br>			<span class="hljs-keyword">return</span><br>		&#125;<br>	&#125;<br><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> !== <span class="hljs-variable language_">this</span>.<span class="hljs-property">CLOSED</span>) &#123;<br>		<span class="hljs-comment">// 读取数据</span><br>		<span class="hljs-keyword">while</span> ((temp = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">extractFrame</span>()) === <span class="hljs-literal">true</span>) &#123;&#125;<br>		<span class="hljs-keyword">if</span> (temp === <span class="hljs-literal">false</span>) &#123;<br>			<span class="hljs-comment">// Protocol error</span><br>			<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">close</span>(<span class="hljs-number">1002</span>)<br>			<span class="hljs-comment">// 读取数据超过最大长度限制处理</span><br>		&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-property">length</span> &gt; <span class="hljs-title class_">Connection</span>.<span class="hljs-property">maxBufferLength</span>) &#123;<br>			<span class="hljs-comment">// Frame too big</span><br>			<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">close</span>(<span class="hljs-number">1009</span>)<br>		&#125;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>Connection.prototype.readHandshake()</code>用于对“握手”的报文进行提取解析处理</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">Connection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">readHandshake</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> found = <span class="hljs-literal">false</span>,<br><br><span class="hljs-comment">// Search for &#x27;\r\n\r\n&#x27;</span><br><span class="hljs-comment">// 这里不是很理解，可能是搜索到这几个字符，则说明当前请求接收完成</span><br>	<span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-property">length</span> - <span class="hljs-number">3</span>; i++) &#123;<br>		<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>[i] === <span class="hljs-number">13</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>[i + <span class="hljs-number">2</span>] === <span class="hljs-number">13</span> &amp;&amp;<br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>[i + <span class="hljs-number">1</span>] === <span class="hljs-number">10</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>[i + <span class="hljs-number">3</span>] === <span class="hljs-number">10</span>) &#123;<br>			found = <span class="hljs-literal">true</span><br>			<span class="hljs-keyword">break</span><br>		&#125;<br>	&#125;<br>	<span class="hljs-keyword">if</span> (!found) &#123;<br>		<span class="hljs-comment">// Wait for more data</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	<span class="hljs-comment">// 拆分请求报文</span><br>	data = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, i + <span class="hljs-number">4</span>).<span class="hljs-title function_">toString</span>().<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;\r\n&#x27;</span>)<br>	<span class="hljs-comment">// 切换Web Socket协议处理</span><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">answerHandshake</span>(data)) &#123;<br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-title function_">slice</span>(i + <span class="hljs-number">4</span>)<br>		<span class="hljs-comment">// 更改链接状态为open</span><br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">OPEN</span><br>		<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&#x27;connect&#x27;</span>)<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span><br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-comment">// 对于Web Socket的错误处理都是返回这个响应信息</span><br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span>.<span class="hljs-title function_">end</span>(<span class="hljs-string">&#x27;HTTP/1.1 400 Bad Request\r\n\r\n&#x27;</span>)<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>Connection.prototype.answerHandshake()</code>将<code>HTTP</code>协议切换成<code>Web Socket</code>协议。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">Connection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">answerHandshake</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">lines</span>) &#123;<br>	<span class="hljs-keyword">var</span> path, key, sha1, headers<br><br>	<span class="hljs-comment">// 请求报文，必定包含上面（`工作方式所列出的内容`）提到的内容</span><br>	<span class="hljs-keyword">if</span> (lines.<span class="hljs-property">length</span> &lt; <span class="hljs-number">6</span>) &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	<span class="hljs-comment">// 解析请求url</span><br>	path = lines[<span class="hljs-number">0</span>].<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/^GET (.+) HTTP\/\d\.\d$/i</span>)<br>	<span class="hljs-keyword">if</span> (!path) &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">path</span> = path[<span class="hljs-number">1</span>]<br><br>	<span class="hljs-comment">// 解析为正确的headers格式，代码在下面</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">readHeaders</span>(lines)<br><br>	<span class="hljs-comment">// 验证必要的header</span><br>	<span class="hljs-keyword">if</span> (!(<span class="hljs-string">&#x27;host&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>) ||<br>		!(<span class="hljs-string">&#x27;sec-websocket-key&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>) ||<br>		!(<span class="hljs-string">&#x27;upgrade&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>) ||<br>		!(<span class="hljs-string">&#x27;connection&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>)) &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	<span class="hljs-comment">// &#x27;Upgrade&#x27; 的值必须是&#x27;websocket&#x27;</span><br>	<span class="hljs-comment">// &#x27;Connection&#x27; 的值必须存在&#x27;Upgrade&#x27;</span><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>.<span class="hljs-property">upgrade</span>.<span class="hljs-title function_">toLowerCase</span>() !== <span class="hljs-string">&#x27;websocket&#x27;</span> ||<br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>.<span class="hljs-property">connection</span>.<span class="hljs-title function_">toLowerCase</span>().<span class="hljs-title function_">split</span>(<span class="hljs-regexp">/\s*,\s*/</span>).<span class="hljs-title function_">indexOf</span>(<span class="hljs-string">&#x27;upgrade&#x27;</span>) === -<span class="hljs-number">1</span>) &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	<span class="hljs-comment">// 决定当前链接的Web Scoket协议的版本</span><br>	<span class="hljs-comment">// 这里对不符合的版本，在响应报文中，没有做提示，而是直接当成错误来处理</span><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>[<span class="hljs-string">&#x27;sec-websocket-version&#x27;</span>] !== <span class="hljs-string">&#x27;13&#x27;</span>) &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">key</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>[<span class="hljs-string">&#x27;sec-websocket-key&#x27;</span>]<br><br>	<span class="hljs-comment">// Agree on a protocol</span><br>	<span class="hljs-keyword">if</span> (<span class="hljs-string">&#x27;sec-websocket-protocol&#x27;</span> <span class="hljs-keyword">in</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>) &#123;<br>		<span class="hljs-comment">// Parse</span><br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">protocols</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>[<span class="hljs-string">&#x27;sec-websocket-protocol&#x27;</span>].<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;,&#x27;</span>).<span class="hljs-title function_">map</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">each</span>) &#123;<br>			<span class="hljs-keyword">return</span> each.<span class="hljs-title function_">trim</span>()<br>		&#125;)<br><br>		<span class="hljs-comment">// Select protocol</span><br>		<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">server</span>.<span class="hljs-property">_selectProtocol</span>) &#123;<br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">protocol</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">server</span>.<span class="hljs-title function_">_selectProtocol</span>(<span class="hljs-variable language_">this</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">protocols</span>)<br>		&#125;<br>	&#125;<br><br>	<span class="hljs-comment">// Build and send the response</span><br>	<span class="hljs-comment">// 生成一个`Sec-WebSocket-Accept` key</span><br>	sha1 = crypto.<span class="hljs-title function_">createHash</span>(<span class="hljs-string">&#x27;sha1&#x27;</span>)<br>	sha1.<span class="hljs-title function_">end</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">key</span> + <span class="hljs-string">&#x27;258EAFA5-E914-47DA-95CA-C5AB0DC85B11&#x27;</span>)<br>	key = sha1.<span class="hljs-title function_">read</span>().<span class="hljs-title function_">toString</span>(<span class="hljs-string">&#x27;base64&#x27;</span>)<br><br>	<span class="hljs-comment">// 响应头</span><br>	headers = &#123;<br>		<span class="hljs-title class_">Upgrade</span>: <span class="hljs-string">&#x27;websocket&#x27;</span>,<br>		<span class="hljs-title class_">Connection</span>: <span class="hljs-string">&#x27;Upgrade&#x27;</span>,<br>		<span class="hljs-string">&#x27;Sec-WebSocket-Accept&#x27;</span>: key<br>	&#125;<br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">protocol</span>) &#123;<br>		headers[<span class="hljs-string">&#x27;Sec-WebSocket-Protocol&#x27;</span>] = <span class="hljs-variable language_">this</span>.<span class="hljs-property">protocol</span><br>	&#125;<br><br>	<span class="hljs-comment">// 切换为Web Socket协议的应答</span><br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span>.<span class="hljs-title function_">write</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">buildRequest</span>(<span class="hljs-string">&#x27;HTTP/1.1 101 Switching Protocols&#x27;</span>, headers))<br>	<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span><br>&#125;<br><br><span class="hljs-comment">// 将请求头解析成对象形式的headers</span><br><span class="hljs-title class_">Connection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">readHeaders</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">lines</span>) &#123;<br>	<span class="hljs-keyword">var</span> i, match<br><br>	<span class="hljs-comment">// Extract all headers</span><br>	<span class="hljs-comment">// Ignore bad-formed lines and ignore the first line (HTTP header)</span><br>	<span class="hljs-keyword">for</span> (i = <span class="hljs-number">1</span>; i &lt; lines.<span class="hljs-property">length</span>; i++) &#123;<br>		<span class="hljs-keyword">if</span> ((match = lines[i].<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/^([a-z-]+): (.+)$/i</span>))) &#123;<br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">headers</span>[match[<span class="hljs-number">1</span>].<span class="hljs-title function_">toLowerCase</span>()] = match[<span class="hljs-number">2</span>]<br>		&#125;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>以上就完成了连接的握手处理</p>
+<h3 id="数据解析"><a href="#数据解析" class="headerlink" title="数据解析"></a>数据解析</h3><p><code>WebSocket</code> 以 <code>frame</code> 为单位传输数据, <code>frame</code> 是客户端和服务端数据传输的最小单元, 当一条消息过长时, 通信方可以将该消息拆分成多个 <code>frame</code> 发送, 接收方收到以后重新拼接、解码从而还原出完整的消息, 在 <code>WebSocket</code> 中, <code>frame</code> 有多种类型, <code>frame</code> 的类型由 <code>frame</code> 头部的 <code>Opcode</code> 字段指示</p>
+<p><code>Connection.prototype.extractFrame()</code> 从缓冲区中提取帧(<code>frame</code>)的内容</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">Connection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">extractFrame</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> fin, opcode, B, <span class="hljs-variable constant_">HB</span>, mask, len, payload, start, i, hasMask<br><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-property">length</span> &lt; <span class="hljs-number">2</span>) &#123;<br>		<span class="hljs-keyword">return</span><br>	&#125;<br><br>	<span class="hljs-comment">// Is this the last frame in a sequence?</span><br>	B = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>[<span class="hljs-number">0</span>]<br>	<span class="hljs-variable constant_">HB</span> = B &gt;&gt; <span class="hljs-number">4</span><br>	<span class="hljs-comment">// 判断RSV1, RSV2, RSV3位组成的自定义协议</span><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable constant_">HB</span> % <span class="hljs-number">8</span>) &#123;<br>		<span class="hljs-comment">// RSV1, RSV2 and RSV3 must be clear</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	<span class="hljs-comment">// 用于指示当前的 frame 是消息的最后一个分段，1为最后一个frame</span><br>	fin = <span class="hljs-variable constant_">HB</span> === <span class="hljs-number">8</span><br>	<span class="hljs-comment">// 操作码</span><br>	<span class="hljs-comment">// *  %x0 表示连续消息片断</span><br>	<span class="hljs-comment">// *  %x1 表示文本消息片断</span><br>	<span class="hljs-comment">// *  %x2 表未二进制消息片断</span><br>	<span class="hljs-comment">// *  %x3-7 为将来的非控制消息片断保留的操作码</span><br>	<span class="hljs-comment">// *  %x8 表示连接关闭</span><br>	<span class="hljs-comment">// *  %x9 表示心跳检查的ping</span><br>	<span class="hljs-comment">// *  %xA 表示心跳检查的pong</span><br>	<span class="hljs-comment">// *  %xB-F 为将来的控制消息片断的保留操作码</span><br>	opcode = B % <span class="hljs-number">16</span><br>	<span class="hljs-comment">// 判断是否是有效操作码，0~F,除了这里列出的，其他都为保留的操作码</span><br>	<span class="hljs-keyword">if</span> (opcode !== <span class="hljs-number">0</span> &amp;&amp; opcode !== <span class="hljs-number">1</span> &amp;&amp; opcode !== <span class="hljs-number">2</span> &amp;&amp;<br>		opcode !== <span class="hljs-number">8</span> &amp;&amp; opcode !== <span class="hljs-number">9</span> &amp;&amp; opcode !== <span class="hljs-number">10</span>) &#123;<br>		<span class="hljs-comment">// Invalid opcode</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	<span class="hljs-keyword">if</span> (opcode &gt;= <span class="hljs-number">8</span> &amp;&amp; !fin) &#123;<br>		<span class="hljs-comment">// Control frames must not be fragmented</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br><br>	B = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>[<span class="hljs-number">1</span>]<br>	<span class="hljs-comment">// 取出Mask位，判断传输的数据是否有加掩码，设置为1，掩码键必须放在Masking-key区域</span><br>	<span class="hljs-comment">// 客户端发送给服务端的所有消息，此位的值都是1；</span><br>	hasMask = B &gt;&gt; <span class="hljs-number">7</span><br>	<span class="hljs-keyword">if</span> ((<span class="hljs-variable language_">this</span>.<span class="hljs-property">server</span> &amp;&amp; !hasMask) || (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">server</span> &amp;&amp; hasMask)) &#123;<br>		<span class="hljs-comment">// Frames sent by clients must be masked</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br><br>	<span class="hljs-comment">// Payload length处理</span><br>	<span class="hljs-comment">// 获取 Payload length：传输数据的长度</span><br>	<span class="hljs-comment">// 如果这个值以字节表示是0-125这个范围，那这个值就表示传输数据的长度；</span><br>	<span class="hljs-comment">// 如果这个值是126，则随后的两个字节表示的是一个16进制无符号数，用来表示传输数据的长度；</span><br>	<span class="hljs-comment">// 如果这个值是127,则随后的是8个字节表示的一个64位无符合数，这个数用来表示传输数据的长度</span><br>	len = B % <span class="hljs-number">128</span><br>	start = hasMask ? <span class="hljs-number">6</span> : <span class="hljs-number">2</span><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-property">length</span> &lt; start + len) &#123;<br>		<span class="hljs-comment">// Not enough data in the buffer</span><br>		<span class="hljs-keyword">return</span><br>	&#125;<br>	<span class="hljs-comment">// 获取实际的 payload length</span><br>	<span class="hljs-keyword">if</span> (len === <span class="hljs-number">126</span>) &#123;<br>		len = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-title function_">readUInt16BE</span>(<span class="hljs-number">2</span>)<br>		start += <span class="hljs-number">2</span><br>	&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (len === <span class="hljs-number">127</span>) &#123;<br>		<span class="hljs-comment">// Warning: JS can only store up to 2^53 in its number format</span><br>		len = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-title function_">readUInt32BE</span>(<span class="hljs-number">2</span>) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">pow</span>(<span class="hljs-number">2</span>, <span class="hljs-number">32</span>) + <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-title function_">readUInt32BE</span>(<span class="hljs-number">6</span>)<br>		start += <span class="hljs-number">8</span><br>	&#125;<br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-property">length</span> &lt; start + len) &#123;<br>		<span class="hljs-keyword">return</span><br>	&#125;<br><br>	<span class="hljs-comment">// 提取有效数据</span><br>	payload = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-title function_">slice</span>(start, start + len)<br>	<span class="hljs-comment">// 如果有Mask位，使用给定掩码解码</span><br>	<span class="hljs-keyword">if</span> (hasMask) &#123;<br>		<span class="hljs-comment">// Decode with the given mask</span><br>		mask = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-title function_">slice</span>(start - <span class="hljs-number">4</span>, start)<br>		<span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; payload.<span class="hljs-property">length</span>; i++) &#123;<br>			payload[i] ^= mask[i % <span class="hljs-number">4</span>]<br>		&#125;<br>	&#125;<br>	<span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">buffer</span>.<span class="hljs-title function_">slice</span>(start + len)<br><br>	<span class="hljs-comment">// Proceeds to frame processing</span><br>	<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">processFrame</span>(fin, opcode, payload)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>Connection.prototype.processFrame()</code> 处理接收到的给定帧(<code>frame</code>)</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">Connection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">processFrame</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">fin, opcode, payload</span>) &#123;<br>	<span class="hljs-comment">// 链接关闭处理</span><br>	<span class="hljs-keyword">if</span> (opcode === <span class="hljs-number">8</span>) &#123;<br>		<span class="hljs-comment">// Close frame</span><br>		<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> === <span class="hljs-variable language_">this</span>.<span class="hljs-property">CLOSING</span>) &#123;<br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span>.<span class="hljs-title function_">end</span>()<br>		&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> === <span class="hljs-variable language_">this</span>.<span class="hljs-property">OPEN</span>) &#123;<br>			<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">processCloseFrame</span>(payload)<br>		&#125;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span><br>	&#125; <br>	<span class="hljs-comment">// 心跳检查的ping 处理</span><br>	<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (opcode === <span class="hljs-number">9</span>) &#123;<br>		<span class="hljs-comment">// Ping frame</span><br>		<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> === <span class="hljs-variable language_">this</span>.<span class="hljs-property">OPEN</span>) &#123;<br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span>.<span class="hljs-title function_">write</span>(frame.<span class="hljs-title function_">createPongFrame</span>(payload.<span class="hljs-title function_">toString</span>(), !<span class="hljs-variable language_">this</span>.<span class="hljs-property">server</span>))<br>		&#125;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span><br>	&#125; <br>	<span class="hljs-comment">// 心跳检查的pong 处理</span><br>	<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (opcode === <span class="hljs-number">10</span>) &#123;<br>		<span class="hljs-comment">// Pong frame</span><br>		<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&#x27;pong&#x27;</span>, payload.<span class="hljs-title function_">toString</span>())<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span><br>	&#125;<br><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> !== <span class="hljs-variable language_">this</span>.<span class="hljs-property">OPEN</span>) &#123;<br>		<span class="hljs-comment">// Ignores if the connection isn&#x27;t opened anymore</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span><br>	&#125;<br>	<span class="hljs-comment">// 连续消息帧处理</span><br>	<span class="hljs-keyword">if</span> (opcode === <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> === <span class="hljs-literal">null</span>) &#123;<br>		<span class="hljs-comment">// Unexpected continuation frame</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (opcode !== <span class="hljs-number">0</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> !== <span class="hljs-literal">null</span>) &#123;<br>		<span class="hljs-comment">// Last sequence didn&#x27;t finished correctly</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br><br>	<span class="hljs-keyword">if</span> (!opcode) &#123;<br>		<span class="hljs-comment">// Get the current opcode for fragmented frames</span><br>		opcode = <span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> === <span class="hljs-string">&#x27;string&#x27;</span> ? <span class="hljs-number">1</span> : <span class="hljs-number">2</span><br>	&#125;<br>	<span class="hljs-comment">// 文本消息帧处理</span><br>	<span class="hljs-keyword">if</span> (opcode === <span class="hljs-number">1</span>) &#123;<br>		<span class="hljs-comment">// Save text frame</span><br>		payload = payload.<span class="hljs-title function_">toString</span>()<br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> ? <span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> + payload : payload<br><br>		<span class="hljs-keyword">if</span> (fin) &#123;<br>			<span class="hljs-comment">// Emits &#x27;text&#x27; event</span><br>			<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&#x27;text&#x27;</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span>)<br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> = <span class="hljs-literal">null</span><br>		&#125;<br>	&#125; <br>	<span class="hljs-comment">// 二进制消息帧处理</span><br>	<span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-comment">// Sends the buffer for InStream object</span><br>		<span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span>) &#123;<br>			<span class="hljs-comment">// Emits the &#x27;binary&#x27; event</span><br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">InStream</span><br>			<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&#x27;binary&#x27;</span>, <span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span>)<br>		&#125;<br>		<span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span>.<span class="hljs-title function_">addData</span>(payload)<br><br>		<span class="hljs-keyword">if</span> (fin) &#123;<br>			<span class="hljs-comment">// Emits &#x27;end&#x27; event</span><br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span>.<span class="hljs-title function_">end</span>()<br>			<span class="hljs-variable language_">this</span>.<span class="hljs-property">frameBuffer</span> = <span class="hljs-literal">null</span><br>		&#125;<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="数据发送"><a href="#数据发送" class="headerlink" title="数据发送"></a>数据发送</h3><p>发送数据，需要创建与接收时一样的数据结构，包括<code>fin, opcode, mask, payload-length, mask-key</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title class_">Connection</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">sendText</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">str, callback</span>) &#123;<br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">readyState</span> === <span class="hljs-variable language_">this</span>.<span class="hljs-property">OPEN</span>) &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">socket</span>.<span class="hljs-title function_">write</span>(frame.<span class="hljs-title function_">createTextFrame</span>(str, !<span class="hljs-variable language_">this</span>.<span class="hljs-property">server</span>), callback)<br>	&#125;<br>&#125;<br><span class="hljs-comment">// 创建一个文本frame</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">createTextFrame</span>(<span class="hljs-params">data, masked</span>) &#123;<br>	<span class="hljs-keyword">var</span> payload, meta<br><br>	payload = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(data)<br>	meta = <span class="hljs-title function_">generateMetaData</span>(<span class="hljs-literal">true</span>, <span class="hljs-number">1</span>, masked === <span class="hljs-literal">undefined</span> ? <span class="hljs-literal">false</span> : masked, payload)<br><br>	<span class="hljs-keyword">return</span> <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">concat</span>([meta, payload], meta.<span class="hljs-property">length</span> + payload.<span class="hljs-property">length</span>)<br>&#125;<br><span class="hljs-comment">// 创建frame的元数据部分</span><br><span class="hljs-comment">// 如果frame被屏蔽了，则payload会相应地改变</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">generateMetaData</span>(<span class="hljs-params">fin, opcode, masked, payload</span>) &#123;<br>	<span class="hljs-keyword">var</span> len, meta, start, mask, i<br><br>	len = payload.<span class="hljs-property">length</span><br><br>	<span class="hljs-comment">// 为元数据创建缓冲区</span><br>	meta = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">alloc</span>(<span class="hljs-number">2</span> + (len &lt; <span class="hljs-number">126</span> ? <span class="hljs-number">0</span> : (len &lt; <span class="hljs-number">65536</span> ? <span class="hljs-number">2</span> : <span class="hljs-number">8</span>)) + (masked ? <span class="hljs-number">4</span> : <span class="hljs-number">0</span>))<br><br>	<span class="hljs-comment">// 设置 fin 和 opcode</span><br>	meta[<span class="hljs-number">0</span>] = (fin ? <span class="hljs-number">128</span> : <span class="hljs-number">0</span>) + opcode<br><br>	<span class="hljs-comment">// 设置 Mask 和 length</span><br>	meta[<span class="hljs-number">1</span>] = masked ? <span class="hljs-number">128</span> : <span class="hljs-number">0</span><br>	start = <span class="hljs-number">2</span><br>	<span class="hljs-keyword">if</span> (len &lt; <span class="hljs-number">126</span>) &#123;<br>		meta[<span class="hljs-number">1</span>] += len<br>	&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (len &lt; <span class="hljs-number">65536</span>) &#123;<br>		meta[<span class="hljs-number">1</span>] += <span class="hljs-number">126</span><br>		meta.<span class="hljs-title function_">writeUInt16BE</span>(len, <span class="hljs-number">2</span>)<br>		start += <span class="hljs-number">2</span><br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-comment">// Warning: JS doesn&#x27;t support integers greater than 2^53</span><br>		meta[<span class="hljs-number">1</span>] += <span class="hljs-number">127</span><br>		meta.<span class="hljs-title function_">writeUInt32BE</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(len / <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">pow</span>(<span class="hljs-number">2</span>, <span class="hljs-number">32</span>)), <span class="hljs-number">2</span>)<br>		meta.<span class="hljs-title function_">writeUInt32BE</span>(len % <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">pow</span>(<span class="hljs-number">2</span>, <span class="hljs-number">32</span>), <span class="hljs-number">6</span>)<br>		start += <span class="hljs-number">8</span><br>	&#125;<br><br>	<span class="hljs-comment">// 设置mask-key</span><br>	<span class="hljs-keyword">if</span> (masked) &#123;<br>		mask = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">alloc</span>(<span class="hljs-number">4</span>)<br>		<span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) &#123;<br>			meta[start + i] = mask[i] = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">256</span>)<br>		&#125;<br>		<span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; payload.<span class="hljs-property">length</span>; i++) &#123;<br>			payload[i] ^= mask[i % <span class="hljs-number">4</span>]<br>		&#125;<br>		start += <span class="hljs-number">4</span><br>	&#125;<br><br>	<span class="hljs-keyword">return</span> meta<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>接下来我们就可以根据上面的逻辑，实现一个简单版的websocket服务，包括握手和数据收发功能</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">const</span> net = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;net&quot;</span>)<br><span class="hljs-keyword">const</span> crypto = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;crypto&#x27;</span>)<br><br><span class="hljs-comment">// 链接状态类别</span><br><span class="hljs-keyword">const</span> <span class="hljs-variable constant_">CONNECTING</span> = <span class="hljs-number">0</span>;<br><span class="hljs-keyword">const</span> <span class="hljs-variable constant_">OPEN</span> = <span class="hljs-number">1</span>;<br><br><span class="hljs-comment">// 默认状态</span><br><span class="hljs-keyword">let</span> readyState = <span class="hljs-variable constant_">CONNECTING</span><br><br><span class="hljs-comment">// websocket 入口</span><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">myWebsocket</span> = (<span class="hljs-params">&#123;port, callback&#125;</span>) =&gt; &#123;<br>  <span class="hljs-keyword">const</span> server = <span class="hljs-title function_">createServer</span>(callback)<br>  server.<span class="hljs-title function_">listen</span>(port)<br>&#125;<br><br><span class="hljs-comment">// 创建server</span><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">createServer</span> = (<span class="hljs-params">callback</span>) =&gt; &#123;<br>  <span class="hljs-keyword">let</span> buffer<br>  <span class="hljs-keyword">const</span> server = net.<span class="hljs-title function_">createServer</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">socket</span>) &#123;<br>		<span class="hljs-comment">// 监听 &quot;readable&quot; 事件，从而获取请求的数据包</span><br>    socket.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;readable&quot;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;readable....&#x27;</span>);<br>      <span class="hljs-title function_">doRead</span>(socket, callback)<br>    &#125;)<br>    <span class="hljs-keyword">const</span> <span class="hljs-title function_">close</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>      readyState = <span class="hljs-variable constant_">CONNECTING</span><br>    &#125;<br>    socket.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;close&#x27;</span>, close)<br>    socket.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;error&#x27;</span>, close)<br>  &#125;)<br><br>  <span class="hljs-keyword">return</span> server<br>&#125;<br><br><span class="hljs-comment">// 数据解析</span><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">doRead</span> = (<span class="hljs-params">socket, callback</span>) =&gt; &#123;<br>  <span class="hljs-keyword">let</span> buffer, headers<br>	<span class="hljs-comment">// 从缓冲区获取请求的数据</span><br>  buffer = socket.<span class="hljs-title function_">read</span>()<br><br>	<span class="hljs-comment">// 握手处理</span><br>  <span class="hljs-keyword">if</span> (buffer &amp;&amp; readyState === <span class="hljs-variable constant_">CONNECTING</span>) &#123;<br>    <span class="hljs-keyword">const</span> lines = buffer.<span class="hljs-title function_">toString</span>().<span class="hljs-title function_">split</span>(<span class="hljs-string">&#x27;\r\n&#x27;</span>)<br>    <span class="hljs-keyword">const</span> path = lines[<span class="hljs-number">0</span>].<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/^GET (.*) HTTP\/1.1$/</span>)<br>    <span class="hljs-keyword">if</span> (path) &#123;<br>      <span class="hljs-comment">// console.log(lines);</span><br>      headers = <span class="hljs-title function_">readHeaders</span>(lines.<span class="hljs-title function_">slice</span>(<span class="hljs-number">1</span>))<br>      <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">checkHeaders</span>(headers)) &#123;<br>        <span class="hljs-keyword">return</span> socket.<span class="hljs-title function_">end</span>(<span class="hljs-string">&quot;HTTP/1.1 400 Switching Protocols \r\n\r\n&quot;</span>);<br>      &#125;<br><br>      readyState = <span class="hljs-variable constant_">OPEN</span>;<br>      socket.<span class="hljs-title function_">write</span>(<span class="hljs-string">&quot;HTTP/1.1 101 Switching Protocols\r\n&quot;</span> + <span class="hljs-title function_">returnHeaders</span>(headers))<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>      <br>      <span class="hljs-keyword">return</span>;<br>    &#125;<br>  &#125; <span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-comment">// websocket 连接后解析数据</span><br>    <span class="hljs-keyword">if</span> (readyState === <span class="hljs-variable constant_">OPEN</span>) &#123;<br>      <span class="hljs-keyword">const</span> payload = <span class="hljs-title function_">parseData</span>(buffer)<br>			<span class="hljs-comment">// 用户传递的回调</span><br>      callback&amp;&amp;<span class="hljs-title function_">callback</span>(payload.<span class="hljs-title function_">toString</span>(), <span class="hljs-title function_">sendText</span>(socket))<br>    &#125;<br>  &#125;<br>&#125;<br><span class="hljs-comment">// 获取headers</span><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">readHeaders</span> = (<span class="hljs-params">lines</span>) =&gt; &#123;<br>  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(lines.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> !!line).<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">line</span> =&gt;</span> &#123;<br>    <span class="hljs-keyword">const</span> v = line.<span class="hljs-title function_">match</span>(<span class="hljs-regexp">/^([a-zA-Z-]+): (.+)$/</span>)<br>    <span class="hljs-keyword">return</span> [v[<span class="hljs-number">1</span>].<span class="hljs-title function_">toLowerCase</span>(), v[<span class="hljs-number">2</span>]]<br>  &#125;));<br>&#125;<br><span class="hljs-comment">// 检查headers中是否符合websocket的请求头</span><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">checkHeaders</span> = (<span class="hljs-params">headers</span>) =&gt; &#123;<br>  <span class="hljs-keyword">if</span> (<span class="hljs-string">&#x27;connection&#x27;</span> <span class="hljs-keyword">in</span> headers &amp;&amp; <span class="hljs-string">&#x27;upgrade&#x27;</span> <span class="hljs-keyword">in</span> headers &amp;&amp; <span class="hljs-string">&#x27;sec-websocket-version&#x27;</span> <span class="hljs-keyword">in</span> headers &amp;&amp; <span class="hljs-string">&#x27;sec-websocket-key&#x27;</span> <span class="hljs-keyword">in</span> headers) &#123;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span><br>  &#125;<br><br>  <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>&#125;<br><span class="hljs-comment">// 切换协议时需要返回的请求头</span><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">returnHeaders</span> = (<span class="hljs-params">headers</span>) =&gt; &#123;<br>	<span class="hljs-comment">// 需要使用sha1生成一个 Sec-WebSocket-Accept</span><br>  <span class="hljs-keyword">const</span> sha1 = crypto.<span class="hljs-title function_">createHash</span>(<span class="hljs-string">&#x27;sha1&#x27;</span>)<br>  <span class="hljs-keyword">const</span> key = sha1.<span class="hljs-title function_">end</span>(headers[<span class="hljs-string">&#x27;sec-websocket-key&#x27;</span>] + <span class="hljs-string">&#x27;258EAFA5-E914-47DA-95CA-C5AB0DC85B11&#x27;</span>).<span class="hljs-title function_">read</span>().<span class="hljs-title function_">toString</span>(<span class="hljs-string">&#x27;base64&#x27;</span>)<br><br>  <span class="hljs-keyword">return</span> <span class="hljs-title function_">buildRequest</span>(&#123;<br>    <span class="hljs-title class_">Upgrade</span>: <span class="hljs-string">&#x27;websocket&#x27;</span>,<br>		<span class="hljs-title class_">Connection</span>: <span class="hljs-string">&#x27;Upgrade&#x27;</span>,<br>		<span class="hljs-string">&#x27;Sec-WebSocket-Accept&#x27;</span>: key<br>  &#125;)<br>&#125;<br><span class="hljs-comment">// 生成返回的请求头格式</span><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">buildRequest</span> = (<span class="hljs-params">headers</span>) =&gt; &#123;<br>  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(headers).<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">collect, key</span>) =&gt;</span> &#123;<br>    collect += <span class="hljs-string">`<span class="hljs-subst">$&#123;key&#125;</span>: <span class="hljs-subst">$&#123;headers[key]&#125;</span>\r\n`</span><br><br>    <span class="hljs-keyword">return</span> collect;<br>  &#125;, <span class="hljs-string">&#x27;&#x27;</span>) + <span class="hljs-string">&quot;\r\n&quot;</span><br>&#125;<br><span class="hljs-comment">// 发送文本数据</span><br><span class="hljs-keyword">const</span> <span class="hljs-title function_">sendText</span> = socket =&gt; <span class="hljs-function"><span class="hljs-params">data</span> =&gt;</span> &#123;<br>	<span class="hljs-keyword">const</span> payload = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(data);<br>	<span class="hljs-keyword">const</span> meta = <span class="hljs-title function_">generateMetaData</span>(<span class="hljs-literal">true</span>, <span class="hljs-number">1</span>, <span class="hljs-literal">false</span>, payload)<br>	<br>	socket.<span class="hljs-title function_">write</span>(<span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">concat</span>([meta, payload], meta.<span class="hljs-property">length</span> + payload.<span class="hljs-property">length</span>))<br>&#125;<br><br><span class="hljs-comment">// 这部分逻辑是直接拿过来用的，还是别人的更香，注释就看上面</span><br><span class="hljs-keyword">const</span> parseData = <span class="hljs-keyword">function</span> (<span class="hljs-params">buffer</span>) &#123;<br>	<span class="hljs-keyword">var</span> fin, opcode, B, <span class="hljs-variable constant_">HB</span>, mask, len, payload, start, i, hasMask<br><br>	<span class="hljs-keyword">if</span> (buffer.<span class="hljs-property">length</span> &lt; <span class="hljs-number">2</span>) &#123;<br>		<span class="hljs-keyword">return</span><br>	&#125;<br><br>	<span class="hljs-comment">// Is this the last frame in a sequence?</span><br>	B = buffer[<span class="hljs-number">0</span>]<br>	<span class="hljs-variable constant_">HB</span> = B &gt;&gt; <span class="hljs-number">4</span><br>	<span class="hljs-keyword">if</span> (<span class="hljs-variable constant_">HB</span> % <span class="hljs-number">8</span>) &#123;<br>		<span class="hljs-comment">// RSV1, RSV2 and RSV3 must be clear</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	fin = <span class="hljs-variable constant_">HB</span> === <span class="hljs-number">8</span><br>	opcode = B % <span class="hljs-number">16</span><br><br>	<span class="hljs-keyword">if</span> (opcode !== <span class="hljs-number">0</span> &amp;&amp; opcode !== <span class="hljs-number">1</span> &amp;&amp; opcode !== <span class="hljs-number">2</span> &amp;&amp;<br>		opcode !== <span class="hljs-number">8</span> &amp;&amp; opcode !== <span class="hljs-number">9</span> &amp;&amp; opcode !== <span class="hljs-number">10</span>) &#123;<br>		<span class="hljs-comment">// Invalid opcode</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	<span class="hljs-keyword">if</span> (opcode &gt;= <span class="hljs-number">8</span> &amp;&amp; !fin) &#123;<br>		<span class="hljs-comment">// Control frames must not be fragmented</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br><br>	B = buffer[<span class="hljs-number">1</span>]<br>	hasMask = B &gt;&gt; <span class="hljs-number">7</span><br>	<span class="hljs-keyword">if</span> (!hasMask) &#123;<br>		<span class="hljs-comment">// Frames sent by clients must be masked</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span><br>	&#125;<br>	len = B % <span class="hljs-number">128</span><br>	start = hasMask ? <span class="hljs-number">6</span> : <span class="hljs-number">2</span><br><br>	<span class="hljs-keyword">if</span> (buffer.<span class="hljs-property">length</span> &lt; start + len) &#123;<br>		<span class="hljs-comment">// Not enough data in the buffer</span><br>		<span class="hljs-keyword">return</span><br>	&#125;<br><br>	<span class="hljs-comment">// Get the actual payload length</span><br>	<span class="hljs-keyword">if</span> (len === <span class="hljs-number">126</span>) &#123;<br>		len = buffer.<span class="hljs-title function_">readUInt16BE</span>(<span class="hljs-number">2</span>)<br>		start += <span class="hljs-number">2</span><br>	&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (len === <span class="hljs-number">127</span>) &#123;<br>		<span class="hljs-comment">// Warning: JS can only store up to 2^53 in its number format</span><br>		len = buffer.<span class="hljs-title function_">readUInt32BE</span>(<span class="hljs-number">2</span>) * <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">pow</span>(<span class="hljs-number">2</span>, <span class="hljs-number">32</span>) + buffer.<span class="hljs-title function_">readUInt32BE</span>(<span class="hljs-number">6</span>)<br>		start += <span class="hljs-number">8</span><br>	&#125;<br>	<span class="hljs-keyword">if</span> (buffer.<span class="hljs-property">length</span> &lt; start + len) &#123;<br>		<span class="hljs-keyword">return</span><br>	&#125;<br><br>	<span class="hljs-comment">// Extract the payload</span><br>	payload = buffer.<span class="hljs-title function_">slice</span>(start, start + len)<br>	<span class="hljs-keyword">if</span> (hasMask) &#123;<br>		<span class="hljs-comment">// Decode with the given mask</span><br>		mask = buffer.<span class="hljs-title function_">slice</span>(start - <span class="hljs-number">4</span>, start)<br>		<span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; payload.<span class="hljs-property">length</span>; i++) &#123;<br>			payload[i] ^= mask[i % <span class="hljs-number">4</span>]<br>		&#125;<br>	&#125;<br>	buffer = buffer.<span class="hljs-title function_">slice</span>(start + len)<br><br>	<span class="hljs-comment">// Proceeds to frame processing</span><br>	<span class="hljs-keyword">return</span> payload<br>&#125;<br><span class="hljs-comment">// 这部分逻辑是直接拿过来用的，还是别人的更香，注释就看上面</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">generateMetaData</span>(<span class="hljs-params">fin, opcode, masked, payload</span>) &#123;<br>	<span class="hljs-keyword">var</span> len, meta, start, mask, i<br><br>	len = payload.<span class="hljs-property">length</span><br><br>	<span class="hljs-comment">// Creates the buffer for meta-data</span><br>	meta = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">alloc</span>(<span class="hljs-number">2</span> + (len &lt; <span class="hljs-number">126</span> ? <span class="hljs-number">0</span> : (len &lt; <span class="hljs-number">65536</span> ? <span class="hljs-number">2</span> : <span class="hljs-number">8</span>)) + (masked ? <span class="hljs-number">4</span> : <span class="hljs-number">0</span>))<br><br>	<span class="hljs-comment">// Sets fin and opcode</span><br>	meta[<span class="hljs-number">0</span>] = (fin ? <span class="hljs-number">128</span> : <span class="hljs-number">0</span>) + opcode<br><br>	<span class="hljs-comment">// Sets the mask and length</span><br>	meta[<span class="hljs-number">1</span>] = masked ? <span class="hljs-number">128</span> : <span class="hljs-number">0</span><br>	start = <span class="hljs-number">2</span><br>	<span class="hljs-keyword">if</span> (len &lt; <span class="hljs-number">126</span>) &#123;<br>		meta[<span class="hljs-number">1</span>] += len<br>	&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (len &lt; <span class="hljs-number">65536</span>) &#123;<br>		meta[<span class="hljs-number">1</span>] += <span class="hljs-number">126</span><br>		meta.<span class="hljs-title function_">writeUInt16BE</span>(len, <span class="hljs-number">2</span>)<br>		start += <span class="hljs-number">2</span><br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-comment">// Warning: JS doesn&#x27;t support integers greater than 2^53</span><br>		meta[<span class="hljs-number">1</span>] += <span class="hljs-number">127</span><br>		meta.<span class="hljs-title function_">writeUInt32BE</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(len / <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">pow</span>(<span class="hljs-number">2</span>, <span class="hljs-number">32</span>)), <span class="hljs-number">2</span>)<br>		meta.<span class="hljs-title function_">writeUInt32BE</span>(len % <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">pow</span>(<span class="hljs-number">2</span>, <span class="hljs-number">32</span>), <span class="hljs-number">6</span>)<br>		start += <span class="hljs-number">8</span><br>	&#125;<br><br>	<span class="hljs-comment">// Set the mask-key</span><br>	<span class="hljs-keyword">if</span> (masked) &#123;<br>		mask = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">alloc</span>(<span class="hljs-number">4</span>)<br>		<span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) &#123;<br>			meta[start + i] = mask[i] = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>() * <span class="hljs-number">256</span>)<br>		&#125;<br>		<span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; payload.<span class="hljs-property">length</span>; i++) &#123;<br>			payload[i] ^= mask[i % <span class="hljs-number">4</span>]<br>		&#125;<br>		start += <span class="hljs-number">4</span><br>	&#125;<br><br>	<span class="hljs-keyword">return</span> meta<br>&#125;<br><br><span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = myWebsocket<br></code></pre></td></tr></table></figure>
+<p>好的，现在我们已经封装完成了，就可以引用我们的代码来试用了</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-title function_">myWebsocket</span>(&#123;<span class="hljs-attr">port</span>: <span class="hljs-number">3000</span>, <span class="hljs-title function_">callback</span>(<span class="hljs-params">data, sendText</span>) &#123;<br>  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Received Data: &#x27;</span> + data);<br>  <span class="hljs-title function_">sendText</span>(data.<span class="hljs-title function_">toUpperCase</span>() + <span class="hljs-string">&quot;!!!!&quot;</span>);<br>&#125;&#125;)<br></code></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>经过对<code>nodejs-websocket</code>源码的阅读，我们从深层次了解了<code>websocket</code>是如何进行握手，并且如何从HTTP协议切换到<code>Web Socket</code>协议，以及在对数据进行解析时，需要通过哪些标志位(<code>FIN, Opcode, Mask</code>等)来告诉我们当前数据的状态是怎么样的，我们该如何处理。然后在代码的实现中，我们可以更好的去学习<code>Nodejs</code>是如何搭建一个服务，并加深我们对<code>nodejs</code>的开发能力</p>
+<p>笔者能力有限，倘若在阅读时，有哪些不是很懂，欢迎在<a target="_blank" rel="noopener" href="https://github.com/yxlazy/blog/issues">这里</a>评论留言，大家一起讨论，共同进步</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Sec-WebSocket-Accept">https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Sec-WebSocket-Accept</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket">https://developer.mozilla.org/zh-CN/docs/Web/API/WebSocket</a></p>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903463202062343">https://juejin.cn/post/6844903463202062343</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.php.cn/http/http-http101.html">https://www.php.cn/http/http-http101.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/3444ea70b6cb">https://www.jianshu.com/p/3444ea70b6cb</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/407711596">https://zhuanlan.zhihu.com/p/407711596</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/sitegui/nodejs-websocket">https://github.com/sitegui/nodejs-websocket</a></p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/node/" class="category-chain-item">node</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">#源码解析</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>使用nodejs创建websocket</div>
+      <div>https://www.yxlazy.xyz/2022/10/13/使用nodejs创建websocket/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yxlazy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2022年10月13日</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>更新于</div>
+          <div>2023年1月12日</div>
+        </div>
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/10/25/react-tiny-virtual-list%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" title="react-tiny-virtual-list源码解析">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">react-tiny-virtual-list源码解析</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/08/04/%E5%9C%A8%E5%87%BD%E6%95%B0%E7%BB%84%E4%BB%B6%E4%B8%AD%EF%BC%8C%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0shouldComponentUpdate/" title="在函数组件中，如何实现shouldComponentUpdate">
+                        <span class="hidden-mobile">在函数组件中，如何实现shouldComponentUpdate</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  <!-- 灰色页面 -->
+
+
+
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?8514c4ed7d7682442371b277e8bfea43";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
